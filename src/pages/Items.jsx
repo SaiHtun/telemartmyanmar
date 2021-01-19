@@ -72,7 +72,7 @@ function Items() {
       return (
         array.length > 0 &&
         array.map((item) => {
-          return <Item key={item.id} item={item}></Item>;
+          return <Item key={item.id} item={item} ></Item>;
         })
       );
     }
@@ -233,11 +233,11 @@ const ItemsContainer = styled.div`
   .itemList {
     /* margin: 0px 15px; */
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 250px));
+    grid-template-columns: repeat(auto-fit, minmax(170px, 180px));
     justify-items: center;
 
     @media only screen and (max-width: 500px) {
-      grid-template-columns: repeat(auto-fit, minmax(170px, 172px));
+      grid-template-columns: repeat(auto-fit, minmax(160px, 172px));
       margin: 0 15px;
     }
   }

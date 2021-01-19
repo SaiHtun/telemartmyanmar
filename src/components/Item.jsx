@@ -18,7 +18,7 @@ const StyledItem = styled.div`
     margin: 0px 20px;
   }
   @media only screen and (max-width: 500px) {
-    margin: 0px 10px;
+    margin: 0px;
   }
 
   .rowTitle {
@@ -86,7 +86,7 @@ const StyledItem = styled.div`
 
   .imgContainer {
     width: 100%;
-    height: 240px;
+    height: 200px !important;
     transition: all 0.5s ease-out;
 
     :hover {

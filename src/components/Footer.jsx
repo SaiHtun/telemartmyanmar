@@ -106,6 +106,11 @@ const FooterContainer = styled.div`
 const Message = styled.div`
   padding: 20px;
 
+  @media only screen and (max-width: 400px) {
+    padding: 20px 0px;
+  }
+
+
   h3 {
     text-align: left;
     font-size: 1.2em;
@@ -139,11 +144,16 @@ const Location = styled.div`
 `;
 
 const Contact = styled.div`
+  width: 200px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: center;
   gap: 5px;
+
+  @media only screen and (max-width: 400px) {
+    gap: 10px;
+  }
 `;
 
 const Social = styled.div`
@@ -151,6 +161,10 @@ const Social = styled.div`
     display: flex;
     justify-content: center;
     gap: 10px;
+
+    @media only screen and (max-width: 400px) {
+      gap: 15px;
+    }
 
    .fb {
         color: #3b5998;

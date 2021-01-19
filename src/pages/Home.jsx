@@ -153,6 +153,7 @@ export default function Home() {
           partialVisible
           responsive={responsiveSetting}
           className="slider"
+          removeArrowOnDeviceType={["mobile"]}
         >
           {gridItems("smartphones")}
         </Carousel>
@@ -167,10 +168,10 @@ export default function Home() {
           <Link to="/watchesandaccessories">See all</Link>
         </div>
         <Carousel
-          swipeable
-          partialVisible
+          swipeable={true}
           responsive={responsiveSetting}
           className="slider"
+          removeArrowOnDeviceType={["mobile"]}
         >
           {gridItems("watchesandaccessories")}
         </Carousel>
@@ -188,6 +189,7 @@ export default function Home() {
           partialVisible
           responsive={responsiveSetting}
           className="slider"
+          removeArrowOnDeviceType={["mobile"]}
         >
           {gridItems("smarttv")}
         </Carousel>
@@ -206,6 +208,7 @@ export default function Home() {
           partialVisible
           responsive={responsiveSetting}
           className="slider"
+          removeArrowOnDeviceType={["mobile"]}
         >
           {gridItems("electronics")}
         </Carousel>
@@ -429,8 +432,8 @@ const Row = styled.div`
       margin-top: 30px;
 
       li {
-        min-width: 250px !important;
-        max-width: 280px;
+        min-width: 170px !important;
+        max-width: 180px;
         height: max-content;
         margin: 0px 5px;
 
@@ -438,7 +441,8 @@ const Row = styled.div`
           margin: 0px 20px;
         }
         @media only screen and (max-width: 500px) {
-          margin: 0px 10px;
+          margin: 0px;
+          max-width: 170px;
         }
       }
     }
