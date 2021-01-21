@@ -13,6 +13,9 @@ import { FaArrowLeft } from "react-icons/fa";
 // components
 import Footer from "../components/Footer";
 import { ReactComponent as Loading } from "../assets/loading.svg";
+// SEO
+import { Helmet } from "react-helmet";
+import ColorCircle from "../components/ColorCircle";
 
 function Item() {
   const { openNav } = useContext(NavContext);
@@ -72,8 +75,29 @@ function Item() {
     }
   };
 
+  const getContent = () => {
+    if(category === "smartphones") {
+      return "We've been distributing more than 20 brands including Apple, iphone, Huawei, Xiaomi and Samsung more than 10 years across Myanmar. "
+    }else if(category === "watchesandaccessories") {
+      return "due to the popularity of the smart watches, we've been added it into our main distribution channel very recently for our customers. "
+    }else if(category === "smarttv") {
+      return "We are now officially partnered with Xiaomi and distributing Xiaomi smart television and many other products as well."
+    }else {
+      return "We have been distributing the electronics devices more than 20 years, fair prices and better quality is our priority."
+    }
+  }
+
   return (
     <div style={{ backgroundColor: "white" }}>
+      <Helmet>
+          <meta charSet="utf-8" />
+          <title>{data.items.name} | telemartmyanmar</title>
+          <meta
+            name="descriptions"
+            content={getContent()}
+          />
+          <link rel="canonical" href="http://www.telemartmyanmar.com" />
+        </Helmet>
       {data?.items ? (
         <ItemsContainer open={openNav}>
           <div className="container">
@@ -130,11 +154,10 @@ function Item() {
                   })}
                 </ItemSpec>
                 <ul className="itemMoreInfo">
-                  <li>
-                    <span>Colors : </span>
-                    {data?.items.colors.map((color, i) => (
-                      <p key={i}>{color}</p>
-                    ))}
+                  <li className="colorsWrapper">
+                      {data?.items.colors.map((color, i) => (
+                        <ColorCircle key={i} color={color}></ColorCircle>
+                      ))}
                   </li>
                   <li>{discount}</li>
                   {data?.items.bestseller && (
@@ -293,15 +316,16 @@ const ItemsContainer = styled.div`
         margin: 20px 0px;
         list-style: none;
 
-        p {
-          display: inline;
+        .colorsWrapper {
+          display: flex;
+          width: max-content;
+          gap: 5px;
+          background-color: #dadada;
+          border-radius: 10px;
+          padding: 5px;
         }
 
-        p:not(:last-child) {
-          ::after {
-            content: ", "
-          }
-        }
+      
 
         span {
           font-weight: bold;

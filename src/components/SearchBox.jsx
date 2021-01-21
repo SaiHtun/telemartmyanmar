@@ -127,9 +127,8 @@ const Container = styled.div`
       border-top-right-radius: 5px;
       border-bottom-right-radius: 5px;
       border: none;
-      outline: none;
-      /* outline-color: ${color.lightBlue};
-      outline-offset: -2px; */
+      outline-color: ${color.lightBlue};
+      outline-offset: -2px;
 
     
 

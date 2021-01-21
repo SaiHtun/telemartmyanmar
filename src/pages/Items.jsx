@@ -11,19 +11,20 @@ import { NavContext } from "../context/NavContext";
 // tv
 import tv from "../assets/hero1.png";
 // phone
-import phone from '../assets/hero2.png';
+import phone from "../assets/hero2.png";
 // watch
-import watch from '../assets/hero4.png';
+import watch from "../assets/hero4.png";
 // elec
-import electronics from '../assets/hero6.jpg';
-
+import electronics from "../assets/hero6.jpg";
+// SEO
+import { Helmet } from "react-helmet";
 
 //  variables
 import { color } from "../constants/variables";
 // components
 import Item from "../components/Item";
 import Footer from "../components/Footer";
-import { ReactComponent as Loading } from '../assets/loading.svg';
+import { ReactComponent as Loading } from "../assets/loading.svg";
 // utility functions
 import { currencyFormatter } from "../utility/functions";
 
@@ -73,16 +74,18 @@ function Items() {
     if (loading) {
       return (
         <LoadingWrapper>
-          <Loading style={{ width: "50px", height: "50px", marginTop: "200px" }}></Loading>
+          <Loading
+            style={{ width: "50px", height: "50px", marginTop: "200px" }}
+          ></Loading>
         </LoadingWrapper>
-      )
+      );
     } else if (error) {
       console.error(error.message);
     } else {
       return (
         array.length > 0 &&
         array.map((item) => {
-          return <Item key={item.id} item={item} ></Item>;
+          return <Item key={item.id} item={item}></Item>;
         })
       );
     }
@@ -131,21 +134,45 @@ function Items() {
   };
 
   const getAds = () => {
-    if(location.pathname === "/smartphones") {
+    if (location.pathname === "/smartphones") {
       return phone;
-    }else if(location.pathname === "/watchesandaccessories") {
+    } else if (location.pathname === "/watchesandaccessories") {
       return watch;
-    }else if(location.pathname === "/electronics") {
+    } else if (location.pathname === "/electronics") {
       return electronics;
-    }else {
+    } else {
       return tv;
     }
-  }
-  
+  };
+
+  const getHeader = (i) => {
+    if (i === "smartphones") {
+      return "Smart phones";
+    } else if (i === "watchesandaccessories") {
+      return "Watches and Accessories";
+    } else if (i === "smarttv") {
+      return "Smart TV";
+    } else if (i === "electronics") {
+      return "Electronics";
+    } else if (i === "deals") {
+      return "Deals";
+    } else {
+      return "Best Seller";
+    }
+  };
 
   return (
     <>
       <ItemsContainer open={openNav}>
+        <Helmet>
+          <meta charSet="utf-8" />
+          <title>{getHeader(items)} | telemartmyanmar</title>
+          <meta
+            name="descriptions"
+            content="The biggest and most reliable mobile phones, watches, smart tv, electronics devices distribution company in Myanmar"
+          />
+          <link rel="canonical" href="http://www.telemartmyanmar.com" />
+        </Helmet>
         <Ads src={getAds()}></Ads>
         <div className="container">
           <h3 className="title">{array && getHeader(items)}</h3>
@@ -200,7 +227,6 @@ const LoadingWrapper = styled.div`
   justify-content: center;
   align-items: flex-start;
 `;
-
 
 const ItemsContainer = styled.div`
   width: 100%;
@@ -330,21 +356,7 @@ const Filter = styled.div`
   }
 `;
 
-const getHeader = (i) => {
-  if (i === "smartphones") {
-    return "Smart phones";
-  } else if (i === "watchesandaccessories") {
-    return "Watches and Accessories";
-  } else if (i === "smarttv") {
-    return "Smart TV";
-  } else if (i === "electronics") {
-    return "Electronics";
-  } else if (i === "deals") {
-    return "Deals";
-  } else {
-    return "Best Seller";
-  }
-};
+
 
 const Error = styled.div`
   @media only screen and (max-width: 500px) {

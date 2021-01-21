@@ -4,7 +4,7 @@ import styled, { css } from "styled-components";
 // components
 import Item from "../components/Item";
 import Footer from "../components/Footer";
-import Carousel from '../components/Carousel';
+import Carousel from "../components/Carousel";
 // assets
 import a1 from "../assets/hero6.jpg";
 import a2 from "../assets/hero1.png";
@@ -12,7 +12,7 @@ import a3 from "../assets/hero2.png";
 import a4 from "../assets/hero3.png";
 import sps from "../assets/gift.jpg";
 import ads from "../assets/hero5.png";
-import { ReactComponent as Loading } from '../assets/loading.svg';
+import { ReactComponent as Loading } from "../assets/loading.svg";
 import { color, fontSize } from "../constants/variables";
 // context
 import { ItemsContext } from "../context/ItemsContext";
@@ -24,8 +24,8 @@ import { NavContext } from "../context/NavContext";
 import AwesomeSlider from "react-awesome-slider";
 import "react-awesome-slider/dist/styles.css";
 import withAutoplay from "react-awesome-slider/dist/autoplay";
-// carousel setting
-import responsiveSetting from "../constants/carousel";
+// SEO
+import { Helmet } from "react-helmet";
 
 //  autoplay slider
 const AutoplaySlider = withAutoplay(AwesomeSlider);
@@ -73,14 +73,21 @@ export default function Home() {
 
   const loading = data?.allItems.items.length < 1 && (
     <LoadingWrapper>
-      <Loading style={{ width: "50px", height: "50px", marginTop: "200px"}}></Loading>
+      <Loading
+        style={{ width: "50px", height: "50px", marginTop: "200px" }}
+      ></Loading>
     </LoadingWrapper>
-  )
+  );
 
   return (
     <Hero open={openNav}>
-      { loading }
-     
+      <Helmet>
+        <meta charSet="utf-8" />
+        <title>Home | telemartmyanmar</title>
+        <meta name="descriptions" content="The biggest and most reliable mobile phones, watches, smart tv, electronics devices distribution company in Myanmar"/>
+        <link rel="canonical" href="http://www.telemartmyanmar.com" />
+      </Helmet>
+      {loading}
       <AutoplaySlider
         className="heroSlider"
         play={true}
@@ -106,8 +113,7 @@ export default function Home() {
           },
         ]}
       ></AutoplaySlider>
-      
-     
+
       {/* showcase */}
       <Showcase>
         {/* Deals */}
@@ -149,9 +155,7 @@ export default function Home() {
           </Link>{" "}
           <Link to="/smartphones">See all</Link>
         </div>
-        <Carousel>
-          {gridItems("smartphones")}  
-        </Carousel>
+        <Carousel>{gridItems("smartphones")}</Carousel>
       </Row>
       <Row>
         <div className="rowTitle">
@@ -160,9 +164,7 @@ export default function Home() {
           </Link>{" "}
           <Link to="/watchesandaccessories">See all</Link>
         </div>
-        <Carousel>
-          {gridItems("watchesandaccessories")}
-        </Carousel>
+        <Carousel>{gridItems("watchesandaccessories")}</Carousel>
       </Row>
       {/* row Smart TV */}
       <Row>
@@ -172,9 +174,7 @@ export default function Home() {
           </Link>
           <Link to="/smarttv">See all</Link>
         </div>
-        <Carousel>
-          {gridItems("smarttv")}
-        </Carousel>
+        <Carousel>{gridItems("smarttv")}</Carousel>
       </Row>
       {/* row  Electronics */}
       <Row>
@@ -185,15 +185,11 @@ export default function Home() {
           </Link>
           <Link to="/electronics">See all</Link>
         </div>
-        <Carousel>
-        {gridItems("electronics")}
-        </Carousel>
+        <Carousel>{gridItems("electronics")}</Carousel>
       </Row>
       <Footer></Footer>
     </Hero>
   );
-
-  
 }
 
 const LoadingWrapper = styled.div`
@@ -571,11 +567,3 @@ const info = {
   title: "Smart phone and watch",
   img: [sps, sps, sps, sps],
 };
-
-
-
-
-
-
-
-
