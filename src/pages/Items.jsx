@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import {
   GET_SPECIFIC_ITEMS,
@@ -8,6 +8,15 @@ import {
   GET_BESTSELLERS_ITEMS,
 } from "../queries/query";
 import { NavContext } from "../context/NavContext";
+// tv
+import tv from "../assets/hero1.png";
+// phone
+import phone from '../assets/hero2.png';
+// watch
+import watch from '../assets/hero4.png';
+// elec
+import electronics from '../assets/hero6.jpg';
+
 
 //  variables
 import { color } from "../constants/variables";
@@ -26,6 +35,7 @@ function Items() {
   const [maxPrice, setMaxPrice] = useState(0);
   const { openNav } = useContext(NavContext);
   const { items } = useParams();
+  const location = useLocation();
 
   // const abortController = new AbortController();
   let whatToQuery = () => {
@@ -84,7 +94,7 @@ function Items() {
 
   let brands = getUnique("brand");
 
-  let AllBrands = ["all", ...brands].map((item, index) => {
+  let AllBrands = ["All", ...brands].map((item, index) => {
     return (
       <option value={item} key={index}>
         {item}
@@ -97,7 +107,7 @@ function Items() {
     let temp = [...data?.itemsCollection.items];
     if (e.target.name === "brand") {
       setBrand(e.target.value);
-      if (e.target.value !== "all") {
+      if (e.target.value !== "All") {
         temp = temp.filter((item) => item.brand === e.target.value);
         setArray(temp);
         return;
@@ -107,7 +117,7 @@ function Items() {
       setPrice(Number(e.target.value));
 
       if (Number(e.target.value) !== price) {
-        if (brand !== "all") {
+        if (brand !== "All") {
           temp = temp.filter(
             (item) => item.price <= e.target.value && item.brand === brand
           );
@@ -120,10 +130,23 @@ function Items() {
     }
   };
 
+  const getAds = () => {
+    if(location.pathname === "/smartphones") {
+      return phone;
+    }else if(location.pathname === "/watchesandaccessories") {
+      return watch;
+    }else if(location.pathname === "/electronics") {
+      return electronics;
+    }else {
+      return tv;
+    }
+  }
+  
+
   return (
     <>
       <ItemsContainer open={openNav}>
-        <div className="ads"></div>
+        <Ads src={getAds()}></Ads>
         <div className="container">
           <h3 className="title">{array && getHeader(items)}</h3>
           <Filter>
@@ -163,6 +186,11 @@ function Items() {
   );
 }
 
+const Ads = styled.img`
+  width: 100%;
+  object-fit: contain;
+`;
+
 const LoadingWrapper = styled.div`
   width: 100vw;
   height: 100vh;
@@ -194,13 +222,6 @@ const ItemsContainer = styled.div`
     @media only screen and (max-width: 500px) {
       width: 100vw;
     }
-  }
-
-  .ads {
-    width: 100%;
-    height: 300px;
-    background-color: salmon;
-    position: relative;
   }
 
   .title {

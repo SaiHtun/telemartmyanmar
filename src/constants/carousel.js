@@ -13,8 +13,8 @@ const responsive = {
       max: 464,
       min: 0
     },
-    items: 6,
-    slidesToSlide: 3,
+    items: 1,
+    // slidesToSlide: 3,
     // partialVisibilityGutter: 40
   },
   tablet: {

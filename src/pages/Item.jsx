@@ -9,10 +9,10 @@ import { color } from "../constants/variables";
 // import functions
 import { currencyFormatter } from "../utility/functions";
 // icons
-import { FaArrowCircleLeft } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 // components
 import Footer from "../components/Footer";
-import { ReactComponent as Loading } from '../assets/loading.svg';
+import { ReactComponent as Loading } from "../assets/loading.svg";
 
 function Item() {
   const { openNav } = useContext(NavContext);
@@ -38,11 +38,14 @@ function Item() {
     };
   }, [data]);
 
-  if(loading) return (
-    <LoadingWrapper>
-      <Loading style={{ width: "50px", height: "50px", marginTop: "200px" }}></Loading>
-    </LoadingWrapper>
-  )
+  if (loading)
+    return (
+      <LoadingWrapper>
+        <Loading
+          style={{ width: "50px", height: "50px", marginTop: "200px" }}
+        ></Loading>
+      </LoadingWrapper>
+    );
 
   if (error) return <div>{error.message}</div>;
 
@@ -57,6 +60,18 @@ function Item() {
     </span>
   );
 
+  const getHeader = (i) => {
+    if (i === "smartphones") {
+      return "Smart phones";
+    } else if (i === "watchesandaccessories") {
+      return "Watches and Accessories";
+    } else if (i === "smarttv") {
+      return "Smart TV";
+    } else {
+      return "Electronics";
+    }
+  };
+
   return (
     <div style={{ backgroundColor: "white" }}>
       {data?.items ? (
@@ -65,9 +80,7 @@ function Item() {
             <h3 className="header">
               <Link to={`/${category}`}>
                 <span className="category">
-                  <FaArrowCircleLeft
-                    style={{ marginRight: "5px" }}
-                  ></FaArrowCircleLeft>
+                  <FaArrowLeft style={{ marginRight: "5px" }}></FaArrowLeft>
                   {getHeader(data?.items.category)}{" "}
                 </span>{" "}
               </Link>{" "}
@@ -117,6 +130,12 @@ function Item() {
                   })}
                 </ItemSpec>
                 <ul className="itemMoreInfo">
+                  <li>
+                    <span>Colors : </span>
+                    {data?.items.colors.map((color, i) => (
+                      <p key={i}>{color}</p>
+                    ))}
+                  </li>
                   <li>{discount}</li>
                   {data?.items.bestseller && (
                     <li>
@@ -274,6 +293,16 @@ const ItemsContainer = styled.div`
         margin: 20px 0px;
         list-style: none;
 
+        p {
+          display: inline;
+        }
+
+        p:not(:last-child) {
+          ::after {
+            content: ", "
+          }
+        }
+
         span {
           font-weight: bold;
         }
@@ -289,26 +318,6 @@ const StyledError = styled.div`
   justify-content: center;
   align-items: center;
 `;
-
-const getHeader = (i) => {
-  if (i === "smartphoneandwatch") {
-    return "Smart phone and watch";
-  } else if (i === "accessories") {
-    return "Accessories";
-  } else if (i === "smarttv") {
-    return "Smart TV";
-  } else {
-    return "Electronics";
-  }
-};
-
-// const Loading = styled.div`
-//   width: 100%;
-//   height: 80vh;
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-// `;
 
 const ImgArrayContainer = styled.div`
   width: 100%;

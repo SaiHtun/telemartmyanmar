@@ -4,6 +4,7 @@ import styled, { css } from "styled-components";
 // components
 import Item from "../components/Item";
 import Footer from "../components/Footer";
+import Carousel from '../components/Carousel';
 // assets
 import a1 from "../assets/hero6.jpg";
 import a2 from "../assets/hero1.png";
@@ -17,8 +18,8 @@ import { color, fontSize } from "../constants/variables";
 import { ItemsContext } from "../context/ItemsContext";
 import { NavContext } from "../context/NavContext";
 // Carousel
-import Carousel from "react-multi-carousel";
-import "react-multi-carousel/lib/styles.css";
+// import Carousel from "react-multi-carousel";
+// import "react-multi-carousel/lib/styles.css";
 // ads carousel
 import AwesomeSlider from "react-awesome-slider";
 import "react-awesome-slider/dist/styles.css";
@@ -148,17 +149,9 @@ export default function Home() {
           </Link>{" "}
           <Link to="/smartphones">See all</Link>
         </div>
-        {/* <div className="rowContainer"> */}
-        <Carousel
-          partialVisible
-          responsive={responsiveSetting}
-          className="slider"
-          removeArrowOnDeviceType={["mobile"]}
-        >
-          {gridItems("smartphones")}
+        <Carousel>
+          {gridItems("smartphones")}  
         </Carousel>
-
-        {/* </div> */}
       </Row>
       <Row>
         <div className="rowTitle">
@@ -167,12 +160,7 @@ export default function Home() {
           </Link>{" "}
           <Link to="/watchesandaccessories">See all</Link>
         </div>
-        <Carousel
-          swipeable={true}
-          responsive={responsiveSetting}
-          className="slider"
-          removeArrowOnDeviceType={["mobile"]}
-        >
+        <Carousel>
           {gridItems("watchesandaccessories")}
         </Carousel>
       </Row>
@@ -184,13 +172,7 @@ export default function Home() {
           </Link>
           <Link to="/smarttv">See all</Link>
         </div>
-        <Carousel
-          swipeable
-          partialVisible
-          responsive={responsiveSetting}
-          className="slider"
-          removeArrowOnDeviceType={["mobile"]}
-        >
+        <Carousel>
           {gridItems("smarttv")}
         </Carousel>
       </Row>
@@ -203,14 +185,8 @@ export default function Home() {
           </Link>
           <Link to="/electronics">See all</Link>
         </div>
-        <Carousel
-          swipeable
-          partialVisible
-          responsive={responsiveSetting}
-          className="slider"
-          removeArrowOnDeviceType={["mobile"]}
-        >
-          {gridItems("electronics")}
+        <Carousel>
+        {gridItems("electronics")}
         </Carousel>
       </Row>
       <Footer></Footer>
@@ -427,7 +403,7 @@ const Row = styled.div`
   background-color: #fff;
   margin-bottom: 15px;
 
-  .slider {
+  /* .slider {
     ul {
       margin-top: 30px;
 
@@ -446,7 +422,11 @@ const Row = styled.div`
         }
       }
     }
-  }
+
+    @media only screen and (max-width: 500px) {
+      display: none;      
+    }
+  } */
 
   @media only screen and (max-width: 800px) {
     margin: 0px;
@@ -574,6 +554,17 @@ const Row = styled.div`
     }
   }
 `;
+
+// const MobileCarousel = styled.div`
+//   display: none;
+//   justify-content: flex-start;
+//   align-items: center;
+//   overflow-x: auto;
+
+//   @media only screen and (max-width: 500px ) {
+//     display: flex;
+//   }
+// `;
 
 const info = {
   name: "Samsung",
