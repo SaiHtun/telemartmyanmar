@@ -115,31 +115,25 @@ const Menu = styled.div`
 `;
 
 const Humberger = styled.div`
-  width: 25px;
-  height: 20px;
-  line-height: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
+  width: 60px;
+  height: 60px;
+  padding-right: 20px;
+  padding-left: 0px;
   display: none;
   z-index: 1000;
   cursor: pointer;
   @media only screen and (max-width: 820px) {
-    width: 30px;
-    height: 10px;
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   @media only screen and (max-width: 500px) {
     position: absolute;
     left: 20px;
-    width: 30px;
-    height: 10px;
-    display: inline-block;
   }
 
   .line {
-    height: 2px;
+    height: 3px;
     line-height: 3px;
     margin-bottom: 3px;
     background-color: white;

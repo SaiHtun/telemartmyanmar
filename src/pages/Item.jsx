@@ -9,7 +9,7 @@ import { color } from "../constants/variables";
 // import functions
 import { currencyFormatter } from "../utility/functions";
 // icons
-import { FaArrowLeft } from "react-icons/fa";
+import { FaAngleRight } from "react-icons/fa";
 // components
 import Footer from "../components/Footer";
 import { ReactComponent as Loading } from "../assets/loading.svg";
@@ -102,12 +102,11 @@ function Item() {
         <ItemsContainer open={openNav}>
           <div className="container">
             <h3 className="header">
-              <Link to={`/${category}`}>
-                <span className="category">
-                  <FaArrowLeft style={{ marginRight: "5px" }}></FaArrowLeft>
+              <Link className="backHome" to="/">Home</Link>
+              <FaAngleRight></FaAngleRight>
+              <Link className="goCategory" to={`/${category}`}>
                   {getHeader(data?.items.category)}{" "}
-                </span>{" "}
-              </Link>{" "}
+              </Link>
             </h3>
             <h3 className="itemName">{data?.items.name}</h3>
             <div className="item">
@@ -251,8 +250,13 @@ const ItemsContainer = styled.div`
     padding-top: 65px;
     display: flex;
     align-items: center;
+    gap: 10px;
 
-    .category {
+    .backHome {
+      color: black;
+    }
+
+    .goCategory {
       color: ${color.lightBlue};
       display: flex;
       justify-content: flex-start;
@@ -319,7 +323,7 @@ const ItemsContainer = styled.div`
         .colorsWrapper {
           display: flex;
           width: max-content;
-          gap: 5px;
+          gap: 10px;
           background-color: #dadada;
           border-radius: 10px;
           padding: 5px;
@@ -349,10 +353,7 @@ const ImgArrayContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  ::-webkit-scrollbar {
-    display: none;
-  }
-
+  
   @media only screen and (max-width: 500px) {
     flex-direction: row;
     position: absolute;
@@ -362,9 +363,7 @@ const ImgArrayContainer = styled.div`
     left: 0px;
     justify-content: flex-start;
 
-    ::-webkit-scrollbar {
-      display: block;
-    }
+   
   }
 `;
 

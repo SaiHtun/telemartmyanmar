@@ -30,7 +30,7 @@ import { currencyFormatter } from "../utility/functions";
 
 function Items() {
   const [array, setArray] = useState([]);
-  const [brand, setBrand] = useState("all");
+  const [brand, setBrand] = useState("All");
   const [price, setPrice] = useState(0);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
@@ -105,6 +105,12 @@ function Items() {
     );
   });
 
+  const updatePrice = (array) => {
+    let prices = array.map((item) => item.price);
+    setMinPrice(Math.min(...prices));
+    setMaxPrice(Math.max(...prices));
+  };
+
   // handle change for "select brand filter"
   const handleChange = (e) => {
     let temp = [...data?.itemsCollection.items];
@@ -113,23 +119,21 @@ function Items() {
       if (e.target.value !== "All") {
         temp = temp.filter((item) => item.brand === e.target.value);
         setArray(temp);
-        return;
+        updatePrice(temp);
       }
+      updatePrice(temp);
       setArray(temp);
     } else if (e.target.name === "price") {
       setPrice(Number(e.target.value));
-
-      if (Number(e.target.value) !== price) {
-        if (brand !== "All") {
-          temp = temp.filter(
-            (item) => item.price <= e.target.value && item.brand === brand
-          );
-          setArray(temp);
-        } else {
-          temp = temp.filter((item) => item.price <= e.target.value);
-        }
+      if (brand !== "All") {
+        temp = temp.filter(
+          (item) => item.price <= Number(e.target.value) && item.brand === brand
+        );
+        setArray(temp);
+      } else {
+        temp = temp.filter((item) => item.price <= Number(e.target.value));
+        setArray(temp);
       }
-      setArray(temp);
     }
   };
 
@@ -321,16 +325,31 @@ const Filter = styled.div`
       flex: 1;
       margin: 5px;
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       align-items: center;
 
       input[type="range"] {
         width: 60%;
+        color: ${color.lightBlue};
       }
 
       span {
         width: 100px;
         margin-left: 15px;
+      }
+    }
+
+    @media only screen and (max-width: 500px) {
+      input {
+        margin-top: 10px;
+        width: 100%;
+        height: 30px;
+        cursor: pointer;
+        margin: 0px !important;
+      }
+
+      select {
+        margin-left: 0px !important;
       }
     }
   }
@@ -355,8 +374,6 @@ const Filter = styled.div`
     }
   }
 `;
-
-
 
 const Error = styled.div`
   @media only screen and (max-width: 500px) {
