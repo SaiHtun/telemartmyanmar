@@ -44,12 +44,16 @@ function Menu() {
           <li>Smart Tv</li>
         </Link>
         <Link
-          className="lastLi"
+          // className="lastLi"
           to="/electronics"
           onClick={() => setOpenNav(false)}
         >
           <li>Electronics</li>
         </Link>
+        <Link to="/services" onClick={() => setOpenNav(false)}>
+          <li>Customer Service</li>
+        </Link>
+       
         <li className="info">
           <p className="social">
             <FaFacebookSquare className="fb" /> <FaInstagram className="in" />{" "}

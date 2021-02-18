@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import { useQuery } from "@apollo/client";
-import { GET_ITEM } from "../queries/query";
-import { useParams, Link } from "react-router-dom";
+import QueryTypes from '../queries/queryTypes';
+import { useParams, Link, useLocation } from "react-router-dom";
 import { NavContext } from "../context/NavContext";
 //  variables
 import { color } from "../constants/variables";
@@ -11,11 +11,12 @@ import { currencyFormatter } from "../utility/functions";
 // icons
 import { FaAngleRight } from "react-icons/fa";
 // components
-import Footer from "../components/Footer";
 import { ReactComponent as Loading } from "../assets/loading.svg";
+import Options from '../components/OptionCard';
 // SEO
 import { Helmet } from "react-helmet";
 import ColorCircle from "../components/ColorCircle";
+import OptionCard from "../components/OptionCard";
 
 function Item() {
   const { openNav } = useContext(NavContext);
@@ -24,16 +25,51 @@ function Item() {
     name: "iphone",
     url: "../assets/a1.jpg",
   });
-  const { loading, error, data } = useQuery(GET_ITEM, {
+  
+
+
+
+
+  const quries = new URLSearchParams(useLocation().search);
+  const str = quries.get("category");
+  
+
+  const isQueryString = () => {
+    if(str) {
+      return queryConverter[str.toLowerCase()];
+    } else {
+      return queryConverter[category]
+    }
+  }
+
+
+
+
+  const queryConverter = {
+    "smartphones": QueryTypes.single_smartphone,
+    "watchesandaccessories": QueryTypes.single_watch,
+    "electronics": QueryTypes.single_electronic,
+    "smarttv": QueryTypes.single_tv
+  }
+
+ 
+
+  
+  const { loading, error, data } = useQuery(isQueryString(), {
     variables: { itemId: itemId },
   });
 
+
   useEffect(() => {
-    if (data?.items.imagesCollection.items.length) {
+    if (data?.item.imagesCollection.items.length) {
       setImgData({
-        name: data.items.name,
-        url: data.items.imagesCollection.items[0].url,
+        name: data.item.name,
+        url: data.item.imagesCollection.items[0].url,
       });
+
+      if(data?.item.optionsCollection?.items.length) {
+        
+      }
     }
 
     return () => {
@@ -52,16 +88,10 @@ function Item() {
 
   if (error) return <div>{error.message}</div>;
 
-  const handleClick = (url, name) => {
+  const handleHover = (url, name) => {
     setImgData({ name, url });
   };
 
-  const discount = data?.items.discount && (
-    <span>
-      Discount :{" "}
-      <span style={{ fontWeight: 400 }}>{data?.items.discount}%</span>
-    </span>
-  );
 
   const getHeader = (i) => {
     if (i === "smartphones") {
@@ -70,8 +100,12 @@ function Item() {
       return "Watches and Accessories";
     } else if (i === "smarttv") {
       return "Smart TV";
-    } else {
+    } else if(i === "electronics") {
       return "Electronics";
+    } else if(i === "bestsellers") {
+      return "Best Sellers"
+    } else {
+      return "Deals"
     }
   };
 
@@ -86,111 +120,148 @@ function Item() {
       return "We have been distributing the electronics devices more than 20 years, fair prices and better quality is our priority."
     }
   }
+  const ImagesSection = data.item.imagesCollection.items.length > 1 ? (
+    <ImgWrapper>
+      {/* img array container */}
+      <ImgArrayContainer>
+        {data.item.imagesCollection.items.map((image, i) => {
+          return (
+            <Image
+              src={image.url}
+              key={i}
+              alt={data.item.name}
+              onMouseOver={() =>
+                handleHover(image.url, data.item.name)
+              }
+              onClick={() =>
+                handleHover(image.url, data.item.name)
+              }
+              primary={imgData.url === image.url ? true : false}
+            ></Image>
+          );
+        })}
+      </ImgArrayContainer>
+      {/* main image */}
+      <img
+        className="itemImg"
+        src={imgData.url}
+        alt={imgData.name}
+      />
+    </ImgWrapper>
+  ) : (
+    <img
+      className="itemImg"
+      src={`${data.item.imagesCollection.items[0].url}`}
+      alt={`${data.item.name}`}
+    />
+  )
+
+  const ramrom = data.item.ram && (
+    <>
+      <li><Left>RAM :</Left><Right>{data.item.ram}GB</Right> </li>
+      <li><Left>ROM :</Left> <Right>{data.item.rom}GB</Right></li>
+    </>
+  )
+
+  const isDiscount = data?.item.discount ? (
+    <>
+      <li>
+        <Left>
+          Discount :
+        </Left>
+        <Right >{data?.item.discount}%</Right>
+      </li>
+      <li>
+        <Left>Original Price :</Left>
+        <Right>{currencyFormatter(data.item.price)} Kyats</Right>
+      </li>
+      <li>
+        <Left>Final Price :</Left>
+        <Right>{currencyFormatter(
+          Math.floor(
+            data.item.price -
+              data.item.price * (data.item.discount / 100)
+          )
+        )}{" "}
+        Kyats
+        </Right>
+      </li>
+    </>
+  ) : (
+    <li>
+      <Left>Price :</Left> <Right>{currencyFormatter(data.item.price)}{" "}
+      Kyats
+      </Right>
+    </li>
+  )
+
+  const isBestseller = data?.item.bestseller && (
+    <li>
+      <Left>Best Seller : </Left><Right>Yes</Right>
+    </li>
+  )
+
+  const options = data.item.optionsCollection?.items.length && <Option>
+    { 
+      data.item.optionsCollection.items.map((item) => {
+        return (
+          <OptionCard ram={item.ram} rom={item.rom} price={item.price} colors={item.colors}></OptionCard>
+        )
+      })
+    }
+  </Option>
+
 
   return (
     <div style={{ backgroundColor: "white" }}>
       <Helmet>
           <meta charSet="utf-8" />
-          <title>{data.items.name} | telemartmyanmar</title>
+          <title>{data.item.name} | telemartmyanmar</title>
           <meta
             name="descriptions"
             content={getContent()}
           />
           <link rel="canonical" href="http://www.telemartmyanmar.com" />
         </Helmet>
-      {data?.items ? (
+      {data?.item ? (
         <ItemsContainer open={openNav}>
           <div className="container">
             <h3 className="header">
               <Link className="backHome" to="/">Home</Link>
               <FaAngleRight></FaAngleRight>
               <Link className="goCategory" to={`/${category}`}>
-                  {getHeader(data?.items.category)}{" "}
+                  {getHeader(category)}{" "}
               </Link>
             </h3>
-            <h3 className="itemName">{data?.items.name}</h3>
+            <h3 className="itemName">{data?.item.name}</h3>
             <div className="item">
-              {data.items.imagesCollection.items.length > 1 ? (
-                <ImgWrapper>
-                  {/* img array container */}
-                  <ImgArrayContainer>
-                    {data.items.imagesCollection.items.map((image, i) => {
-                      return (
-                        <Image
-                          src={image.url}
-                          key={i}
-                          alt={data.items.name}
-                          onClick={() =>
-                            handleClick(image.url, data.items.name)
-                          }
-                          primary={imgData.url === image.url ? true : false}
-                        ></Image>
-                      );
-                    })}
-                  </ImgArrayContainer>
-                  {/* main image */}
-                  <img
-                    className="itemImg"
-                    src={imgData.url}
-                    alt={imgData.name}
-                  />
-                </ImgWrapper>
-              ) : (
-                <img
-                  className="itemImg"
-                  src={`${data.items.imagesCollection.items[0].url}`}
-                  alt={`${data.items.name}`}
-                />
-              )}
+              { ImagesSection }
 
               {/* item info price, discount, best seller */}
               <div className="itemInfo">
-                <p> {data.items.descriptions} </p>
-                {/* items specification */}
-                <ItemSpec>
-                  {data?.items.specs.map((spec, i) => {
-                    return <li key={i}>{spec}</li>;
-                  })}
-                </ItemSpec>
                 <ul className="itemMoreInfo">
+                  { ramrom }
+                  { isDiscount }
+                  { isBestseller }
+                  <li>
+                    <Left>In Stock :</Left> <Right>{data.item.instock ? "Yes" : "No (Pre-Order Available)"}</Right>
+                  </li>
                   <li className="colorsWrapper">
-                      {data?.items.colors.map((color, i) => (
+                      {data.item.colors.map((color, i) => (
                         <ColorCircle key={i} color={color}></ColorCircle>
                       ))}
                   </li>
-                  <li>{discount}</li>
-                  {data?.items.bestseller && (
-                    <li>
-                      <span>Best Seller : </span> Yes{" "}
-                    </li>
-                  )}
-                  {data?.items.discount ? (
-                    <>
-                      <li>
-                        <span>Original Price</span>:{" "}
-                        {currencyFormatter(data?.items.price)} Kyats
-                      </li>
-                      <li>
-                        <span>Final Price</span>:{" "}
-                        {currencyFormatter(
-                          Math.floor(
-                            data?.items.price -
-                              data?.items.price * (data.items.discount / 100)
-                          )
-                        )}{" "}
-                        Kyats
-                      </li>
-                    </>
-                  ) : (
-                    <li>
-                      <span>Price</span>: {currencyFormatter(data?.items.price)}{" "}
-                      Kyats
-                    </li>
-                  )}
-                  <li>
-                    <span>In Stock :</span> {data.items.instock ? "Yes" : "No"}
-                  </li>
                 </ul>
+                {/*  optional phones */}
+                { options? options: null }
+                <p> {data.item.descriptions}</p>
+                {/* items specification */}
+                <ItemSpec>
+                  {data.item.specs.map((spec, i) => {
+                    return <li key={i}>{spec}</li>;
+                  })}
+                </ItemSpec>
+                
               </div>
             </div>
           </div>
@@ -204,7 +275,6 @@ function Item() {
         </StyledError>
       )}
       <MarginDiv />
-      <Footer></Footer>
     </div>
   );
 }
@@ -284,7 +354,7 @@ const ItemsContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 30px;
+    margin-top: 100px;
 
     @media only screen and (max-width: 1000px) {
       flex-direction: column;
@@ -329,14 +399,20 @@ const ItemsContainer = styled.div`
           padding: 5px;
         }
 
-      
-
-        span {
-          font-weight: bold;
-        }
       }
     }
   }
+`;
+
+const Left = styled.span`
+  font-weight: 600;
+`;
+
+const Right = styled.span`
+  font-size: 15px;
+  color: rgba(0,0,0,0.8);
+  margin-left: 10px;
+  
 `;
 
 const StyledError = styled.div`
@@ -400,8 +476,14 @@ const MarginDiv = styled.div`
 `;
 
 const ItemSpec = styled.ul`
-  list-style: none;
+  padding-left: 12px;
   margin-top: 20px;
+`;
+
+const Option = styled.div`
+  display: flex;
+  gap: 10px;
+  margin: 10px 0px 20px 0px; 
 `;
 
 export default Item;

@@ -37,7 +37,7 @@ export default function Navbar() {
             <Link to="/bestsellers">
               <li>Best Sellers</li>
             </Link>
-            <Link to="/customerservices">
+            <Link to="/services">
               <li>Customer Service</li>
             </Link>
           </ul>
@@ -58,7 +58,7 @@ const Nav = styled.div`
 `;
 
 const Container = styled.div`
-  width: 90vw;
+  width: 100vw;
   height: 100%;
   margin: 0 auto;
   line-height: 60px;
@@ -67,7 +67,7 @@ const Container = styled.div`
   justify-content: space-around;
 
   @media only screen and (max-width: 820px) {
-    width: 80vw;
+    width: 90vw;
     justify-content: space-between;
   }
 
@@ -83,7 +83,7 @@ const Brand = styled.h2`
 
   span {
     color: ${lightBlue};
-    font-size: 1.2em;
+    font-size: 1.3em;
     font-weight: bold;
   }
   @media only screen and (max-width: 780px) {
@@ -102,7 +102,7 @@ const Menu = styled.div`
     display: flex;
     justify-content: space-around;
     align-items: center;
-    font-size: 1em;
+    font-size: 15px;
     height: 100%;
 
     a {
@@ -133,7 +133,7 @@ const Humberger = styled.div`
   }
 
   .line {
-    height: 3px;
+    height: 2px;
     line-height: 3px;
     margin-bottom: 3px;
     background-color: white;

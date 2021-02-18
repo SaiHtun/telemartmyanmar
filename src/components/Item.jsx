@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { stringCutter } from "../utility/functions";
 import { useHistory } from "react-router-dom";
 //  variables
@@ -7,18 +7,84 @@ import { color, fontSize } from "../constants/variables";
 // import functions
 import { currencyFormatter } from "../utility/functions";
 
+
+
+export default function Item({ item, nocaption }) {
+  const history = useHistory();
+
+  // const query = () => {
+  //   return item.category === "deals" || item.category === "bestsellers"?  `${item.sys.id}?category=${item.__typename}` : `${item.sys.id}` ;
+  // }
+
+  return (
+    <StyledItem
+      onClick={() => history.push(`/${item.category.name}/${item.sys.id}`)}
+      caption={nocaption}
+    >
+      {item.discount ? (
+        <div className="discountItem">-{item.discount}%</div>
+      ) : null}
+      <div className="imgContainer">
+        <img src={item.imagesCollection.items[0].url} alt={item.name} />
+      </div>
+      <div className="itemInfo">
+        <p className="itemTitle">{item.name}</p>
+        {/* <p className="itemDes">{stringCutter(item.descriptions, 60)}</p> */}
+        {item.discount ? (
+          <p>
+            <small className="itemDiscount">
+              {currencyFormatter(item.price)}
+            </small>{" "}
+            <small>
+              {currencyFormatter(
+                Math.floor(item.price - item.price * (item.discount / 100))
+              )}{" "}
+              Kyats
+            </small>
+          </p>
+        ) : (
+          <small>{currencyFormatter(item.price)} Kyats</small>
+        )}
+      </div>
+    </StyledItem>
+  );
+}
+
+
 const StyledItem = styled.div`
-  min-width: 170px !important;
+  min-width: 170px;
   max-width: 280px;
   height: 400px;
-  margin: 0px 5px;
+  margin: 0px 15px;
   cursor: pointer;
+  overflow: hidden;
+  transition: all .3s ease-in;
+
+  .imgContainer {
+    width: 100%;
+    overflow-y: hidden;
+    img {
+      width: 100%
+    }
+  }
+
+  ${(props) => props.caption && css`
+     min-width: 110px !important;
+     max-width: 130px;
+     object-fit: contain;
+
+  `}
+
+  :hover {
+    box-shadow: 0px 5px 10px rgba(0,0,0,0.5)
+  }
 
   @media only screen and (max-width: 800px) {
     margin: 0px 20px;
   }
   @media only screen and (max-width: 500px) {
     margin: 0px;
+    min-width: 170px !important;
   }
 
   .rowTitle {
@@ -80,8 +146,11 @@ const StyledItem = styled.div`
   }
 
   @media only screen and (max-width: 500px) {
-    margin: 5px;
-    text-align: left;
+    margin: 5px 10px;
+
+    :hover {
+      box-shadow: none;
+    }
   }
 
   .imgContainer {
@@ -89,20 +158,17 @@ const StyledItem = styled.div`
     height: 200px !important;
     transition: all 0.5s ease-out;
 
-    :hover {
-      transform: scale(1.06);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     @media only screen and (max-width: 500px) {
       :hover {
         transform: none;
       }
-    }
 
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
     }
   }
 
@@ -129,45 +195,7 @@ const StyledItem = styled.div`
     .itemDiscount {
       text-decoration: line-through;
       color: grey;
+      text-decoration-color: red;
     }
   }
 `;
-
-function Item({ item }) {
-  const history = useHistory();
-
-  return (
-    <StyledItem
-      className="rowItem"
-      onClick={() => history.push(`/${item.category}/${item.id}`)}
-    >
-      {item.discount ? (
-        <div className="discountItem">-{item.discount}%</div>
-      ) : null}
-      <div className="imgContainer">
-        <img src={item.imagesCollection.items[0].url} alt={item.name} />
-      </div>
-      <div className="itemInfo">
-        <p className="itemTitle">{item.name}</p>
-        <p className="itemDes">{stringCutter(item.descriptions, 60)}</p>
-        {item.discount ? (
-          <p>
-            <small className="itemDiscount">
-              {currencyFormatter(item.price)}
-            </small>{" "}
-            <small>
-              {currencyFormatter(
-                Math.floor(item.price - item.price * (item.discount / 100))
-              )}{" "}
-              Kyats
-            </small>
-          </p>
-        ) : (
-          <small>{currencyFormatter(item.price)} Kyats</small>
-        )}
-      </div>
-    </StyledItem>
-  );
-}
-
-export default Item;

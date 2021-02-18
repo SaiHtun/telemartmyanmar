@@ -3,24 +3,18 @@ import { Link, useHistory } from "react-router-dom";
 import styled, { css } from "styled-components";
 // components
 import Item from "../components/Item";
-import Footer from "../components/Footer";
 import Carousel from "../components/Carousel";
 // assets
-import a1 from "../assets/hero6.jpg";
-import a2 from "../assets/hero1.png";
-import a3 from "../assets/hero2.png";
-import a4 from "../assets/hero3.png";
+
 import sps from "../assets/gift.jpg";
-import ads from "../assets/hero5.png";
 import { ReactComponent as Loading } from "../assets/loading.svg";
 import { color, fontSize } from "../constants/variables";
 // context
 import { ItemsContext } from "../context/ItemsContext";
 import { NavContext } from "../context/NavContext";
-// Carousel
-// import Carousel from "react-multi-carousel";
-// import "react-multi-carousel/lib/styles.css";
-// ads carousel
+// apollo graphql query
+import { useQuery } from "@apollo/client";
+import { GET_ITEMS } from "../queries/query";
 import AwesomeSlider from "react-awesome-slider";
 import "react-awesome-slider/dist/styles.css";
 import withAutoplay from "react-awesome-slider/dist/autoplay";
@@ -37,57 +31,77 @@ const { cardTitleText, linkText, desText } = fontSize;
 
 export default function Home() {
   const history = useHistory();
-  // query with async cancellation.
-
-  const { data } = useContext(ItemsContext);
 
   const { openNav } = useContext(NavContext);
 
-  // grid Four items
-  const gridFourItems = (name) => {
-    let array = data && [...data.allItems.items];
+  // home query
+  const { loading, error, data } = useQuery(GET_ITEMS);
 
-    return array
-      .sort(() => Math.random() - 0.5)
-      .filter((item) => item[name])
-      .slice(0, 4)
-      .map((e, i) => {
-        return (
-          <div key={i} onClick={() => history.push(`/${e.category}/${e.id}`)}>
-            <img src={e.imagesCollection.items[0].url} alt="gg" />
-          </div>
-        );
-      });
-  };
-  // grid items
-  const gridItems = (name) => {
-    let array = data && [...data.allItems.items];
-
-    return array
-      .sort(() => Math.random() - 0.5)
-      .filter((item) => item.category === name)
-      .map((e, i) => {
-        return <Item key={i} item={e}></Item>;
-      });
-  };
-
-  const loading = data?.allItems.items.length < 1 && (
+  if(loading) return (
     <LoadingWrapper>
       <Loading
         style={{ width: "50px", height: "50px", marginTop: "200px" }}
       ></Loading>
     </LoadingWrapper>
-  );
+  )
+  if(error) return <h1>{error.message}...</h1>
+  
+  // grid items
+  const gridItems = (category) => {
+    let array = [...data[category].items];
+
+    return array
+      .map((e) => {
+        return <Item key={e.sys.id} item={e} ></Item>;
+      });
+  };
+
+  // const loadingGif = !data && (
+  //   <LoadingWrapper>
+  //     <Loading
+  //       style={{ width: "50px", height: "50px", marginTop: "200px" }}
+  //     ></Loading>
+  //   </LoadingWrapper>
+  // );
+
+  const sources =
+    data &&
+    data.homeCollection.items[0].heroImagesCollection.items.map((item) => {
+      return { source: item.url };
+    });
+
+  const styleObject = {
+    cursor: "pointer",
+  }
+
+  const query = (str, item) => {
+    return str === "deals" || str === "bestsellers"?  `${item.sys.id}?category=${item.category.name}` : `${item.sys.id}` ;
+  }
+
+  const getShowcase = (str) => {
+    let array = [];
+    let newStr = str === "discount"? "deals": "bestsellers";
+    for(let i in data ) {
+       data[i].items.forEach((item) => item[str] &&  array.push(item))
+    }
+    return array.slice(0,3)
+    .map((e) => {
+      return <img onClick={() => history.push(`${newStr}/${query(newStr, e)}`)} style={styleObject} key={e.sys.id} src={e.imagesCollection.items[0].url} alt={e.name}></img>;
+    });
+  }
+  
 
   return (
     <Hero open={openNav}>
       <Helmet>
         <meta charSet="utf-8" />
         <title>Home | telemartmyanmar</title>
-        <meta name="descriptions" content="The biggest and most reliable mobile phones, watches, smart tv, electronics devices distribution company in Myanmar"/>
+        <meta
+          name="descriptions"
+          content="The biggest and most reliable mobile phones, watches, smart tv, electronics devices distributor in Myanmar"
+        />
         <link rel="canonical" href="http://www.telemartmyanmar.com" />
       </Helmet>
-      {loading}
       <AutoplaySlider
         className="heroSlider"
         play={true}
@@ -95,32 +109,20 @@ export default function Home() {
         interval={6000}
         organicArrows={true}
         bullets={true}
-        media={[
-          {
-            source: `${ads}`,
-          },
-          {
-            source: `${a1}`,
-          },
-          {
-            source: `${a2}`,
-          },
-          {
-            source: `${a3}`,
-          },
-          {
-            source: `${a4}`,
-          },
-        ]}
+        media={sources}
       ></AutoplaySlider>
-
+      <MobileWrapper>
+        <MobileHero
+          src={data?.homeCollection.items[0].heroMobileImage.url}
+        ></MobileHero>
+      </MobileWrapper>
       {/* showcase */}
       <Showcase>
         {/* Deals */}
         <ShowcaseItem>
           <h3>Deals</h3>
           <div className="showcaseGrid">
-            {data && gridFourItems("discount")}
+            {data && getShowcase("discount")}
           </div>
           <Link to="/deals">Discover More</Link>
         </ShowcaseItem>
@@ -129,7 +131,7 @@ export default function Home() {
         <ShowcaseItem>
           <h3>Best Seller</h3>
           <div className="showcaseGrid">
-            {data && gridFourItems("bestseller")}
+            {data && getShowcase("bestseller")}
           </div>
           <Link to="/bestsellers">Discover More</Link>
         </ShowcaseItem>
@@ -146,7 +148,7 @@ export default function Home() {
         </ShowcaseItem>
       </Showcase>
       {/* ads */}
-      <Ads></Ads>
+      <Ads src={data?.homeCollection.items[0].adsImage.url}></Ads>
       {/* row Smart phone & watch*/}
       <Row>
         <div className="rowTitle">
@@ -155,7 +157,7 @@ export default function Home() {
           </Link>{" "}
           <Link to="/smartphones">See all</Link>
         </div>
-        <Carousel>{gridItems("smartphones")}</Carousel>
+        <Carousel>{data["smartphones"].items.length && gridItems("smartphones")}</Carousel>
       </Row>
       <Row>
         <div className="rowTitle">
@@ -187,7 +189,6 @@ export default function Home() {
         </div>
         <Carousel>{gridItems("electronics")}</Carousel>
       </Row>
-      <Footer></Footer>
     </Hero>
   );
 }
@@ -222,6 +223,10 @@ const Hero = styled.div`
     height: 70vh;
     margin-top: -6px;
     margin-bottom: -150px;
+
+    @media only screen and (max-width: 600px) {
+      display: none;
+    }
 
     .awssld__bullets {
       position: absolute;
@@ -262,10 +267,6 @@ const Hero = styled.div`
 
   ::-webkit-scrollbar {
     background-color: red;
-  }
-
-  @media only screen and (max-width: 600px) {
-    height: 100vh;
   }
 `;
 
@@ -315,7 +316,7 @@ const Showcase = styled.div`
 
 // ###################################### ShowcaseItem ######################################
 const ShowcaseItem = styled.div`
-  min-width: 270px;
+  min-width: 330px;
   width: 350px;
   height: 420px;
   margin: 10px;
@@ -325,6 +326,7 @@ const ShowcaseItem = styled.div`
     0 0 0 1px rgba(10, 10, 10, 0.02);
   height: max-content;
   z-index: 2;
+  overflow: hidden;
 
   h3 {
     font-size: ${cardTitleText};
@@ -338,7 +340,9 @@ const ShowcaseItem = styled.div`
 
   .showcaseGrid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    height: 100%;
+    grid-template-columns: repeat(2, 150px);
     grid-template-rows: repeat(2, 150px);
     gap: 10px;
     margin: 30px 0;
@@ -346,18 +350,17 @@ const ShowcaseItem = styled.div`
     img {
       width: 100%;
       height: 100%;
-      transition: transform 0.3s ease-out;
+      transition: all 0.3s ease-out;
       object-fit: cover;
+
+      &:hover {
+        box-shadow: 0px 5px 10px rgba(0,0,0,0.5)
+      }
     }
 
-    img:hover {
-      transform: scale(1.1);
-    }
+   
   }
 
-  @media only screen and (max-width: 1000px) {
-    min-width: 280px;
-  }
   @media only screen and (max-width: 900px) {
     min-width: 280px;
     margin-bottom: 10px;
@@ -386,43 +389,16 @@ const Ads = styled.img`
   }
 `;
 
-Ads.defaultProps = {
-  src: ads,
-};
 
 // ###################################### row ######################################
 const Row = styled.div`
   margin: 0px 30px;
+  margin-bottom: 5px;
   min-height: 450px;
   height: max-content;
-  padding: 30px 20px;
+  padding: 30px 20px 10px 20px;
   background-color: #fff;
   margin-bottom: 15px;
-
-  /* .slider {
-    ul {
-      margin-top: 30px;
-
-      li {
-        min-width: 170px !important;
-        max-width: 180px;
-        height: max-content;
-        margin: 0px 5px;
-
-        @media only screen and (max-width: 800px) {
-          margin: 0px 20px;
-        }
-        @media only screen and (max-width: 500px) {
-          margin: 0px;
-          max-width: 170px;
-        }
-      }
-    }
-
-    @media only screen and (max-width: 500px) {
-      display: none;      
-    }
-  } */
 
   @media only screen and (max-width: 800px) {
     margin: 0px;
@@ -551,16 +527,47 @@ const Row = styled.div`
   }
 `;
 
-// const MobileCarousel = styled.div`
-//   display: none;
-//   justify-content: flex-start;
-//   align-items: center;
-//   overflow-x: auto;
+const MobileHero = styled.img`
+  width: 100vw;
+  object-fit: contain;
+  display: none;
+  margin-bottom: -150px;
+  /* position: relative; */
 
-//   @media only screen and (max-width: 500px ) {
-//     display: flex;
-//   }
-// `;
+
+  @media only screen and (max-width: 600px) {
+    display: block;
+
+    
+  }
+`;
+
+const MobileWrapper = styled.div`
+  position: relative;
+
+  @media only screen and (max-width: 600px) {
+    ::before {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 200px;
+      background-image: linear-gradient(
+        to top,
+        rgba(239, 239, 239, 255),
+        rgba(239, 239, 239, 0)
+      );
+    }
+
+    
+  }
+
+
+  
+`;
 
 const info = {
   name: "Samsung",

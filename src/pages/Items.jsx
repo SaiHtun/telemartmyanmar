@@ -1,12 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef, useCallback } from "react";
 import styled, { css } from "styled-components";
 import { useParams, useLocation } from "react-router-dom";
-import { useQuery } from "@apollo/client";
-import {
-  GET_SPECIFIC_ITEMS,
-  GET_DISCOUNT_ITEMS,
-  GET_BESTSELLERS_ITEMS,
-} from "../queries/query";
+import { useQuery, useLazyQuery, InMemoryCache } from "@apollo/client";
+import { offsetLimitPagination, concatPagination } from "@apollo/client/utilities"
+
+// queries
+import QueryTypes from "../queries/queryTypes";
 import { NavContext } from "../context/NavContext";
 // tv
 import tv from "../assets/hero1.png";
@@ -23,54 +22,82 @@ import { Helmet } from "react-helmet";
 import { color } from "../constants/variables";
 // components
 import Item from "../components/Item";
-import Footer from "../components/Footer";
 import { ReactComponent as Loading } from "../assets/loading.svg";
 // utility functions
 import { currencyFormatter } from "../utility/functions";
 
 function Items() {
   const [array, setArray] = useState([]);
+  const [tempArray, setTempArray] = useState([]);
   const [brand, setBrand] = useState("All");
   const [price, setPrice] = useState(0);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const { openNav } = useContext(NavContext);
+  // params
   const { items } = useParams();
   const location = useLocation();
+  // pagination
+  const [ offset, setOffset ] = useState(0);
 
-  // const abortController = new AbortController();
-  let whatToQuery = () => {
-    if (items !== "deals" && items !== "bestsellers") {
-      return GET_SPECIFIC_ITEMS;
-    } else if (items === "deals") {
-      return GET_DISCOUNT_ITEMS;
-    } else if (items === "bestsellers") {
-      return GET_BESTSELLERS_ITEMS;
+  const { loading, error, data, fetchMore } = useQuery(QueryTypes[items], {
+    variables: {
+      offset,
+      limit: 3
     }
-  };
+  });
 
-  let whatVariable = () => {
-    if (items !== "deals" && items !== "bestseller") {
-      return { variables: { items: items } };
-    }
-    return;
-  };
-
-  const { loading, error, data } = useQuery(whatToQuery(), whatVariable());
+  
 
   useEffect(() => {
-    setArray(data?.itemsCollection.items);
-    let priceArray = data?.itemsCollection?.items.map((item) => item.price);
-    let defaultPrice = data ? Math.max(...priceArray) : null;
-    let minPrice = data ? Math.min(...priceArray) : null;
-    defaultPrice && setPrice(defaultPrice);
-    defaultPrice && setMaxPrice(defaultPrice);
-    minPrice && setMinPrice(minPrice);
+    if(data && data.smartphonesCollection) {
+      let temp = [];
+      for (let i in data) {
+        data[i].items.forEach((item) => temp.push(item));
+      }
+      setArray(shuffle(Array.from(temp)));
+      setTempArray(shuffle(Array.from(temp)));
+      let priceArray = temp.map((item) => item.price);
+      let defaultPrice =  Math.max(...priceArray) ;
+      let minPrice =  Math.min(...priceArray) ;
+      defaultPrice && setPrice(defaultPrice);
+      defaultPrice && setMaxPrice(defaultPrice);
+      minPrice && setMinPrice(minPrice);
+    }else if(data && data.itemsCollection){
+      setArray(shuffle(Array.from(data.itemsCollection.items)));
+      setTempArray(shuffle(Array.from(data.itemsCollection.items)));
+      let priceArray = data.itemsCollection.items.map((item) => item.price);
+      let defaultPrice = Math.max(...priceArray);
+      let minPrice = Math.min(...priceArray);
+      defaultPrice && setPrice(defaultPrice);
+      defaultPrice && setMaxPrice(defaultPrice);
+      minPrice && setMinPrice(minPrice);
+    }
   }, [data]);
 
-  if (error) return <div>{error.message}</div>;
+  
+  
+  function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+  
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+  
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+  
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+    return array;
+  }
+
 
   const allItems = () => {
+
     if (loading) {
       return (
         <LoadingWrapper>
@@ -82,17 +109,21 @@ function Items() {
     } else if (error) {
       console.error(error.message);
     } else {
-      return (
-        array.length > 0 &&
-        array.map((item) => {
-          return <Item key={item.id} item={item}></Item>;
-        })
-      );
+      return array.map((item) => {
+        return (
+            <Item  item={item} key={item.sys.id}></Item>
+        );
+      });
     }
   };
 
+  
+  
+
   const getUnique = (property) => {
-    return new Set(data?.itemsCollection.items.map((item) => item[property]));
+    return new Set(
+      tempArray.map((item) => item[property].name)
+    );
   };
 
   let brands = getUnique("brand");
@@ -113,16 +144,17 @@ function Items() {
 
   // handle change for "select brand filter"
   const handleChange = (e) => {
-    let temp = [...data?.itemsCollection.items];
+    let temp = data && data.itemsCollection? [...data?.itemsCollection.items] : [...tempArray];
     if (e.target.name === "brand") {
       setBrand(e.target.value);
       if (e.target.value !== "All") {
-        temp = temp.filter((item) => item.brand === e.target.value);
+        temp = temp.filter((item) => item.brand.name === e.target.value);
         setArray(temp);
         updatePrice(temp);
+      } else {
+        updatePrice(temp);
+        setArray(temp);
       }
-      updatePrice(temp);
-      setArray(temp);
     } else if (e.target.name === "price") {
       setPrice(Number(e.target.value));
       if (brand !== "All") {
@@ -165,6 +197,18 @@ function Items() {
     }
   };
 
+  
+  const more = () => {
+
+    setOffset(offset + 3)
+    fetchMore({
+      variables: {
+        offset,
+        limit: 3
+      }
+    })
+  }
+  
   return (
     <>
       <ItemsContainer open={openNav}>
@@ -179,7 +223,7 @@ function Items() {
         </Helmet>
         <Ads src={getAds()}></Ads>
         <div className="container">
-          <h3 className="title">{array && getHeader(items)}</h3>
+          {/* <h3 className="title">{data  && getHeader(items)}</h3> */}
           <Filter>
             <form className="form">
               <select
@@ -202,6 +246,7 @@ function Items() {
               </div>
             </form>
           </Filter>
+          <button onClick={more}>Load More</button>
           {array && array.length > 0 ? (
             <div className="itemList">{allItems()}</div>
           ) : (
@@ -212,7 +257,6 @@ function Items() {
       <div
         style={{ width: "100%", height: "100px", backgroundColor: "white" }}
       ></div>
-      <Footer></Footer>
     </>
   );
 }
@@ -246,7 +290,7 @@ const ItemsContainer = styled.div`
     `}
 
   .container {
-    width: 80vw;
+    width: 90vw;
     margin: auto;
 
     @media only screen and (max-width: 500px) {
@@ -284,11 +328,13 @@ const ItemsContainer = styled.div`
   .itemList {
     /* margin: 0px 15px; */
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 180px));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 230px));
     justify-items: center;
+    gap: 10px;
 
     @media only screen and (max-width: 500px) {
       grid-template-columns: repeat(auto-fit, minmax(160px, 172px));
+      gap: 0px;
       margin: 0 15px;
     }
   }
@@ -297,6 +343,7 @@ const ItemsContainer = styled.div`
 const Filter = styled.div`
   width: 630px;
   font-size: 14px;
+  margin-top: 50px;
   margin-bottom: 20px;
 
   .form {

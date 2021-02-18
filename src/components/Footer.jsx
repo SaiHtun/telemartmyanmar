@@ -1,42 +1,38 @@
 import React from "react";
 import styled from "styled-components";
 import { color } from "../constants/variables";
+import { useQuery } from '@apollo/client';
+import { GET_FOOTER } from '../queries/query';
 // icons
 import { FaFacebookSquare, FaInstagram, FaGlobeAfrica } from "react-icons/fa";
 
 export default function Footer() {
+  const { loading, error, data } = useQuery(GET_FOOTER);
+
   return (
     <FooterContainer>
       <h3 className="footerTitleOne">
         <span>Telemartmyanmar</span> is the subsidiaries of{" "}
-        <span>SPS Business Group</span>{" "}
+        <span>Apex Lion Technology Co.,ltd</span>{" "}
       </h3>
       <div className="footerInfo">
         <Message>
-          <h3>Dear valued customers,</h3>
+          <h3>{data?.footerCollection.items[0].title}</h3>
           <p>
-            We are so exicited to launch our brand new 1.0.0 version of the
-            website, purposely to enhance the accessibility of our availble
-            items and services for our business partners and customers,
-            regrettably you won't be able place an order or checkout directly
-            through our website yet due to the requirements of our company's
-            infastructure, but we are promised and aiming to deliver the
-            features near in the future. In the meantime please contact us
-            through via PHONE, MESSENGER or visit our retail store.
+            {data?.footerCollection.items[0].messages}
           </p>
         </Message>
         <Location>
-          <Store>
-            No.130, 7th floor, 24rd street,
-           Upper Block, Latha Township,
-            Yangon, Myanmar.
-          </Store>
           <Contact>
             <Social>
               <FaFacebookSquare className="fb" /> <FaInstagram className="in" />
               <FaGlobeAfrica className="web" />
             </Social>
-            <p> +415 345 9879</p>
+            <p>{data &&  data.footerCollection.items[0].hotlines.map((line, i) => {
+              return (
+                <small key={i}>{line}</small>
+              )
+            })}</p>
           </Contact>
         </Location>
       </div>
@@ -79,6 +75,12 @@ const FooterContainer = styled.div`
     min-height: 400px;
     height: max-content;
     padding: 20px;
+    margin-top: 80px;
+
+    @media only screen and (max-width: 500px) {
+      margin-top: 0px;
+    }
+
   }
 
   .footerTitleOne {
@@ -122,7 +124,10 @@ const Message = styled.div`
     color: rgba(255, 255, 255, 0.6);
     font-size: 15px;
     text-indent: 30px;
+
+   
   }
+
 `;
 
 const Location = styled.div`
@@ -144,12 +149,23 @@ const Location = styled.div`
 `;
 
 const Contact = styled.div`
-  width: 200px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: center;
   gap: 5px;
+
+  p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.8)
+    
+  }
+
+  small {
+    font-size: 13px;
+    margin-right: 10px;
+  }
 
   @media only screen and (max-width: 400px) {
     gap: 10px;
@@ -179,9 +195,6 @@ const Social = styled.div`
 
 
 
-const Store = styled.p`
-  padding: 20px;
-  text-align: center;
-`;
+
 
 

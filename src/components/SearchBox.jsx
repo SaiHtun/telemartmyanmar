@@ -1,4 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
+import { useLazyQuery } from '@apollo/client';
+import { SEARCH_QUERY,  } from '../queries/query';
 import styled, { css } from "styled-components";
 import { color } from "../constants/variables";
 import { useHistory, useLocation } from "react-router-dom";
@@ -15,9 +17,11 @@ import { FaSearch } from "react-icons/fa";
 export default function SearchBox({ show }) {
   const [filtered, setFiltered] = useState([]);
   const [ select, setSelect ] = useState("all");
+  // SEARCH QUERY
+  const [fetchSearch, { called, loading, data }] = useLazyQuery(SEARCH_QUERY);
 
   const [search, setSearch] = useState("");
-  const { data, showSearch, setShowSearch } = useContext(ItemsContext);
+  const { showSearch, setShowSearch } = useContext(ItemsContext);
   const { setOpenNav } = useContext(NavContext);
   const history = useHistory();
   const location = useLocation();
@@ -28,7 +32,7 @@ export default function SearchBox({ show }) {
 
 
   const handleClick = (item) => {
-    history.push(`/${item.category}/${item.id}`);
+    history.push(`/${item.category.name}/${item.sys.id}`);
     setOpenNav(false);
     setShowSearch(false);
   };
@@ -40,11 +44,25 @@ export default function SearchBox({ show }) {
   }
 
   const handleChange = (value) => {
-    setShowSearch(true);
-    let array = data.allItems.items.filter((item) =>
-      item.descriptions.toLowerCase().includes(value.toLowerCase())
-    );
-    setFiltered(array);
+    fetchSearch();
+    if(data && called) {
+      let array = [];
+
+      for(let i in data) {
+        array.push(data[i].items)
+      }
+
+      let filteredArray = array.flat().filter((item) =>  item.descriptions.toLowerCase().includes(value.toLowerCase()));
+      setFiltered(filteredArray);
+      setShowSearch(true);
+    }
+
+
+    // setShowSearch(true);
+    // let array = data.allItems.items.filter((item) =>
+    //   item.descriptions.toLowerCase().includes(value.toLowerCase())
+    // );
+    // setFiltered(array);
   };
 
   let searchItems =

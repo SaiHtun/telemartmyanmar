@@ -15,12 +15,11 @@ export default function Carousel(props) {
         className="slider"
         removeArrowOnDeviceType={["mobile"]}
         keyBoardControl={true}
+        // infinite={true}
       >
         {props.children}
       </MultiCarousel>
-      <MobileCarousel>
-          {props.children}
-      </MobileCarousel>
+      <MobileCarousel>{props.children}</MobileCarousel>
     </Container>
   );
 }
@@ -29,20 +28,11 @@ const Container = styled.div`
   .slider {
     ul {
       margin-top: 30px;
+      overflow-y: hidden;
+      margin-bottom: 5px;
 
       li {
-        min-width: 170px !important;
-        max-width: 180px;
-        height: max-content;
-        margin: 0px 5px;
-
-        @media only screen and (max-width: 800px) {
-          margin: 0px 20px;
-        }
-        @media only screen and (max-width: 500px) {
-          margin: 0px;
-          max-width: 170px;
-        }
+        margin-bottom: 30px;
       }
     }
 
@@ -57,9 +47,10 @@ const MobileCarousel = styled.div`
   justify-content: flex-start;
   align-items: center;
   overflow-x: auto;
-  margin-top: 20px;
+  margin-top: 40px;
 
-  @media only screen and (max-width: 500px ) {
+  @media only screen and (max-width: 500px) {
     display: flex;
+    gap: 15px;
   }
 `;
