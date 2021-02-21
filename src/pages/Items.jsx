@@ -260,6 +260,11 @@ const Button = styled.button`
   color: white;
   font-size: 1.2em;
   box-shadow: 0px 5px 10px rgba(0,0,0,0.8);
+
+  @media only screen and (max-width: 500px) {
+    width: 120px;
+    font-size: 1em;
+  }
 `;
 
 const Ads = styled.img`
