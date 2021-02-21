@@ -13,5 +13,5 @@ const Container = styled.div`
     width: 20px;
     height: 20px;
     border-radius: 50px;
-    background-color: ${(props) => props.color? props.color: "white"};
+    background-color: ${(props) => props.color? props.color.hex || props.color: "white"};
 `;

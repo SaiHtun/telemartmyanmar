@@ -1,707 +1,326 @@
 import { gql } from "@apollo/client";
 
-//  PHONES fragment
-const PhonesFields = gql`
-  fragment getPhones on Smartphones {
-    sys {
-      id
-    }
-    name
-    brand {
-      name
-    }
-    descriptions
-    colors
-    specs
-    ram
-    rom
-    price
-    imagesCollection {
-      items {
-        url
-      }
-    }
-    optionsCollection {
-      items {
-        name
-        ram
-        rom
-        price
-        colors
-      }
-    }
-    bestseller
-    instock
-    discount
-  }
-`;
-//  Electronics fragment
-const ElecFields = gql`
-  fragment getElec on Electronics {
-    sys {
-      id
-    }
-    name
-    brand {
-      name
-    }
-    descriptions
-    colors
-    specs
-    price
-    imagesCollection {
-      items {
-        url
-      }
-    }
-    bestseller
-    instock
-    discount
-  }
-`;
-//  Watches fragment
-const WatchesFields = gql`
-  fragment getWatches on Watchesandaccessories {
-    sys {
-      id
-    }
-    name
-    brand {
-      name
-    }
-    descriptions
-    colors
-    specs
-    price
-    imagesCollection {
-      items {
-        url
-      }
-    }
-    bestseller
-    instock
-    discount
-  }
-`;
-//  smart tv fragment
-const TVFields = gql`
-  fragment getTV on Smarttv {
-    sys {
-      id
-    }
-    name
-    brand {
-      name
-    }
-    descriptions
-    colors
-    specs
-    price
-    imagesCollection {
-      items {
-        url
-      }
-    }
-    bestseller
-    instock
-    discount
-  }
-`;
-
-// All category fragment
-
-const Fields = gql`
-  fragment getTvFields on Smarttv {
-    sys {
-      id
-    }
-    name
-    price
-    imagesCollection (limit: 4){
-      items {
-        url
-      }
-    }
-    category {
-      name
-    }
-    bestseller
-    discount
-  }
-  fragment getElecFields on Electronics {
-    sys {
-      id
-    }
-    name
-    price
-    imagesCollection (limit: 4){
-      items {
-        url
-      }
-    }
-    category {
-      name
-    }
-    bestseller
-    discount
-  }
-
-  fragment getWatchesFields on Watchesandaccessories {
-    sys {
-      id
-    }
-    name
-    price
-    imagesCollection (limit: 4){
-      items {
-        url
-      }
-    }
-    category {
-      name
-    }
-    bestseller
-    discount
-  }
-
-  fragment getPhonesFields on Smartphones {
-    sys {
-      id
-    }
-    name
-    price
-    imagesCollection (limit: 4){
-      items {
-        url
-      }
-    }
-    category {
-      name
-    }
-    bestseller
-    discount
-  }
-`;
 
 // ================================= Quries all items =================================
 
-const GET_ITEMS = gql`
-  query {
-    smartphones: smartphonesCollection(limit: 10) {
-      items { 
-        ...getPhonesFields
-      }
-    }
-    watchesandaccessories: watchesandaccessoriesCollection(limit: 10) {
-      items {
-        ...getWatchesFields
-      }
-    }
-    electronics: electronicsCollection(limit: 10) {
-      items {
-         ...getElecFields
-      }
-    }
-    smarttv: smarttvCollection(limit: 10) {
-     items {
-       ...getTvFields
-     }
-    }
-    homeCollection {
-      items {
-        heroImagesCollection {
-          items {
-            url
-          }
-        }
-        heroMobileImage {
-          url
-        }
-        adsImage {
-          url
-        }
-      }
-    }
-  }
-  ${Fields}
-
-`;
-
-// ================================= Quries single item =================================
-const GET_SINGLE_SMARTPHONES = gql`
-  query($itemId: String!) {
-    item: smartphones(id: $itemId) {
-      ...getPhones
-    }
-  }
-  ${PhonesFields}
-`;
-const GET_SINIGLE_ELECTRONICS = gql`
-  query($itemId: String!) {
-    item: electronics(id: $itemId) {
-      ...getElec
-    }
-  }
-  ${ElecFields}
-`;
-const GET_SINGLE_WATCHES = gql`
-  query($itemId: String!) {
-    item: watchesandaccessories(id: $itemId) {
-      ...getWatches
-    }
-  }
-  ${WatchesFields}
-`;
-const GET_SINGLE_TV = gql`
-  query($itemId: String!) {
-    item: smarttv(id: $itemId) {
-      ...getTV
-    }
-  }
-  ${TVFields}
-`;
-// ================================= Quries categorized  items =================================
-const GET_SMARTPHONES = gql`
-  query Phones ($limit: Int!, $offset: Int!){
-    itemsCollection: smartphonesCollection (limit: $limit, skip: $offset) {
-      items {
-        sys {
-        id
-      }
+const GET_HOME = gql`
+  fragment getFields on Category {
+    items(first: 10) {
+      id
       name
+      images(first: 1) {
+        url
+      }
       price
-      brand {
+      category {
         name
       }
-      imagesCollection (limit: 4){
-        items {
+      discount {
+        value
+      }
+    }
+  }
+
+  query getHomeData{
+    homes {
+      slidingImages {
+        url
+      }
+      adsImage {
+        url
+      }
+      heroMobileImage {
+        url
+      }
+    }
+    
+    discounts(where: { items_some: {discount: { value_gt: 0}}}){
+      items(where: { discount: { value_gt: 0}}) {
+        id
+        discount {
+          value
+        }
+        images(first: 1) {
           url
         }
+      }
+      
+    }
+    
+    bestsellers {
+      items(first: 4) {
+        id
+        images(first: 1) {
+          url
+        }
+      
+      }
+    }
+    smartphones: category (where: { name: "smartphones"}){
+        ...getFields
+    }
+    
+    watchesandaccessories: category (where: { name: "watchesandaccessories"}){
+        ...getFields
+    }
+    
+    electronics: category (where: { name: "electronics"}){
+        ...getFields
+    }
+    
+    smarttv: category (where: { name: "smarttv"}){
+        ...getFields
+    }
+}
+`;
+// ================================= Quries single item =================================
+const GET_SINGLE_ITEM = gql`
+  query getItem($id: ID!){
+    item(where: { id: $id}) {
+      name
+      rom
+      ram
+      price
+      images {
+        url
+      }
+      color {
+        hex
       }
       category {
         name
       }
-      bestseller
-      discount
+      options
+      description
+      specs
+      discount {
+        value
       }
-  }
+      bestseller {
+        isBestseller
+      }
+    }
+}
+`;
+
+const GET_SMARTPHONES = gql`
+  query getSmartphones($cursor: String) {
+     itemsConnection (first: 4, after: $cursor, where: { category: { name: "smartphones"}}){
+      edges {
+        node {
+          id
+          name
+          brand {
+            name
+          }
+          images(first: 1) {
+            url
+          }
+          price
+          category {
+            name
+          }
+          discount {
+            value
+           }
+          }
+        } 
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+    }
   }
 `;
 const GET_ELECTRONICS = gql`
-  query {
-    itemsCollection: electronicsCollection(limit: 10) {
-      items {
-         sys {
-        id
-      }
-      name
-      brand {
-        name
-      }
-      price
-      imagesCollection (limit: 4){
-        items {
-          url
+  query getElectronics($cursor: String) {
+     itemsConnection (first: 4, after: $cursor, where: { category: { name: "electronics"}}){
+      edges {
+        node {
+          id
+          name
+          brand {
+            name
+          }
+          images(first: 1) {
+            url
+          }
+          price
+          category {
+            name
+          }
+          discount {
+            value
+           }
+          }
+        } 
+        pageInfo {
+          endCursor
+          hasNextPage
         }
-      }
-      category {
-        name
-      }
-      bestseller
-      discount
     }
-  }
   }
 `;
 const GET_WATCHES = gql`
-  query {
-    itemsCollection: watchesandaccessoriesCollection {
-      items {
-         sys {
-        id
-      }
-      name
-      brand {
-        name
-      }
-      price
-      imagesCollection (limit: 4){
-        items {
-          url
+   query getWatches($cursor: String) {
+     itemsConnection (first: 4, after: $cursor, where: { category: { name: "watchesandaccessories"}}){
+      edges {
+        node {
+          id
+          name
+          brand {
+            name
+          }
+          images(first: 1) {
+            url
+          }
+          price
+          category {
+            name
+          }
+          discount {
+            value
+           }
+          }
+        } 
+        pageInfo {
+          endCursor
+          hasNextPage
         }
-      }
-      category {
-        name
-      }
-      bestseller
-      discount
     }
-  }
   }
 `;
 const GET_TV = gql`
-  query {
-    itemsCollection: smarttvCollection {
-      items {
-         sys {
-        id
-      }
-      name
-      brand {
-        name
-      }
-      price
-      imagesCollection (limit: 4){
-        items {
-          url
+   query getTv($cursor: String) {
+     itemsConnection (first: 4, after: $cursor, where: { category: { name: "smarttv"}}){
+      edges {
+        node {
+          id
+          name
+          brand {
+            name
+          }
+          images(first: 1) {
+            url
+          }
+          price
+          category {
+            name
+          }
+          discount {
+            value
+           }
+          }
+        } 
+        pageInfo {
+          endCursor
+          hasNextPage
         }
-      }
-      category {
-        name
-      }
-      bestseller
-      discount
     }
   }
-  }
 `;
+
+
 
 // ================================= Discount & Best seller items =================================
 
-const GET_DEAL = gql`
-  query {
-    watchesandaccessoriesCollection(where: { discount_exists: true }, limit: 10) {
-      items {
-        sys {
+const GET_DISCOUNT_ITEMS = gql`
+  query getDiscount ($cursor: String){
+     itemsConnection (first: 4, after: $cursor,  where: { discount: { value_gt: 0}}){
+      edges {
+        node {
           id
-        }
-        name
-        brand {
           name
-        }
-        descriptions
-        colors
-        specs
-        price
-        imagesCollection {
-          items {
-            url
-          }
-        }
-        category {
-          name
-        }
-        bestseller
-        instock
-        discount
-      }
-    }
-    smartphonesCollection(where: { discount_exists: true }, limit: 10) {
-      items {
-        sys {
-          id
-        }
-        name
-        brand {
-          name
-        }
-        descriptions
-        colors
-        specs
-        ram
-        rom
-        price
-        imagesCollection {
-          items {
-            url
-          }
-        }
-        optionsCollection {
-          items {
+          brand {
             name
-            ram
-            rom
-            price
-            colors
           }
-        }
-        category {
-          name
-        }
-        bestseller
-        instock
-        discount
-      }
-    }
-    electronicsCollection(where: { discount_exists: true }, limit: 10) {
-      items {
-        sys {
-          id
-        }
-        name
-        brand {
-          name
-        }
-        descriptions
-        colors
-        specs
-        price
-        imagesCollection {
-          items {
+          images(first: 1) {
             url
           }
-        }
-        category {
-          name
-        }
-        bestseller
-        instock
-        discount
-      }
-    }
-    smarttvCollection(where: { discount_exists: true }, limit: 10) {
-      items {
-        sys {
-          id
-        }
-        name
-        brand {
-          name
-        }
-        descriptions
-        colors
-        specs
-        price
-        imagesCollection {
-          items {
-            url
-          }
-        }
-        category {
-          name
-        }
-        bestseller
-        instock
-        discount
-      }
-    }
-  }
-`;
-const GET_BESTSELLERS = gql`
-  query {
-    watchesandaccessoriesCollection(where: { bestseller_exists: true }, limit: 10) {
-      items {
-        sys {
-          id
-        }
-        name
-        brand {
-          name
-        }
-        descriptions
-        colors
-        specs
-        price
-        imagesCollection {
-          items {
-            url
-          }
-        }
-        category {
-          name
-        }
-        bestseller
-        instock
-        discount
-      }
-    }
-    smartphonesCollection(where: { bestseller_exists: true }, limit: 10) {
-      items {
-        sys {
-          id
-        }
-        name
-        brand {
-          name
-        }
-        descriptions
-        colors
-        specs
-        ram
-        rom
-        price
-        imagesCollection {
-          items {
-            url
-          }
-        }
-        category {
-          name
-        }
-        optionsCollection {
-          items {
+          price
+          category {
             name
-            ram
-            rom
-            price
-            colors
           }
-        }
-        bestseller
-        instock
-        discount
-      }
-    }
-    electronicsCollection(where: { bestseller_exists: true }, limit: 10) {
-      items {
-        sys {
-          id
-        }
-        name
-        brand {
-          name
-        }
-        descriptions
-        colors
-        specs
-        price
-        imagesCollection {
-          items {
-            url
+          discount {
+            value
+           }
           }
+        } 
+        pageInfo {
+          endCursor
+          hasNextPage
         }
-        category {
-          name
-        }
-        bestseller
-        instock
-        discount
-      }
-    }
-    smarttvCollection(where: { bestseller_exists: true }, limit: 10) {
-      items {
-        sys {
-          id
-        }
-        name
-        brand {
-          name
-        }
-        descriptions
-        colors
-        specs
-        price
-        imagesCollection {
-          items {
-            url
-          }
-        }
-        category {
-          name
-        }
-        bestseller
-        instock
-        discount
-      }
     }
   }
 `;
 
-const GET_HOME = gql`
-  query {
-    homeCollection {
-      items {
-        heroImagesCollection {
-          items {
+// ================================= Best Seller =================================
+const GET_BESTSELLER_ITEMS = gql`
+  query getBestSeller ($cursor: String){
+     itemsConnection (first: 4, after: $cursor, where: { bestseller: { isBestseller: true}}){
+      edges {
+        node {
+          id
+          name
+          brand {
+            name
+          }
+          images(first: 1) {
             url
           }
+          price
+          category {
+            name
+          }
+          discount {
+            value
+           }
+          }
+        } 
+        pageInfo {
+          endCursor
+          hasNextPage
         }
-        heroMobileImage {
-          url
-        }
-        adsImage {
-          url
-        }
-      }
     }
   }
 `;
+
+
+
+// ================================= GET Footer =================================
 
 const GET_FOOTER = gql`
-  query {
-    footerCollection {
-      items {
-        title
-        messages
-        hotlines
-      }
+  query getFooterData{
+    footers {
+      title
+      messages
+      hotlines
     }
   }
 `;
 
 /////////// searchbar query /////////////////////////////////
 const SEARCH_QUERY = gql`
-  query {
-    smartphonesCollection {
-      items {
-        sys {
-          id
-        }
-        descriptions
-        category {
-          name
-        }
-      }
-    }
-    watchesandaccessoriesCollection {
-      items {
-        sys {
-          id
-        }
-        descriptions
-        category {
-          name
-        }
-      }
-    }
-    electronicsCollection {
-      items {
-        sys {
-          id
-        }
-        descriptions
-        category {
-          name
-        }
-      }
-    }
-    smarttvCollection {
-      items {
-        sys {
-          id
-        }
-        descriptions
-        category {
-          name
-        }
+  query getSearch {
+    items {
+      id
+      description
+      category {
+        name
       }
     }
   }
 `;
 
 export {
-  GET_ITEMS,
   GET_HOME,
   GET_FOOTER,
   GET_SMARTPHONES,
   GET_ELECTRONICS,
   GET_TV,
   GET_WATCHES,
-  GET_SINGLE_SMARTPHONES,
-  GET_SINGLE_WATCHES,
-  GET_SINIGLE_ELECTRONICS,
-  GET_SINGLE_TV,
-  GET_DEAL,
-  GET_BESTSELLERS,
-  SEARCH_QUERY
+  SEARCH_QUERY,
+  GET_SINGLE_ITEM,
+  GET_DISCOUNT_ITEMS,
+  GET_BESTSELLER_ITEMS
 };

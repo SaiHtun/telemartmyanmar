@@ -17,9 +17,9 @@ export default function Footer() {
       </h3>
       <div className="footerInfo">
         <Message>
-          <h3>{data?.footerCollection.items[0].title}</h3>
+          <h3>{data?.footers[0].title}</h3>
           <p>
-            {data?.footerCollection.items[0].messages}
+            {data?.footers[0].messages}
           </p>
         </Message>
         <Location>
@@ -28,7 +28,7 @@ export default function Footer() {
               <FaFacebookSquare className="fb" /> <FaInstagram className="in" />
               <FaGlobeAfrica className="web" />
             </Social>
-            <p>{data &&  data.footerCollection.items[0].hotlines.map((line, i) => {
+            <p>{data &&  data.footers[0].hotlines.map((line, i) => {
               return (
                 <small key={i}>{line}</small>
               )

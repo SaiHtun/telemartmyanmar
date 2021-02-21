@@ -10,16 +10,20 @@ import sps from "../assets/gift.jpg";
 import { ReactComponent as Loading } from "../assets/loading.svg";
 import { color, fontSize } from "../constants/variables";
 // context
-import { ItemsContext } from "../context/ItemsContext";
 import { NavContext } from "../context/NavContext";
 // apollo graphql query
 import { useQuery } from "@apollo/client";
-import { GET_ITEMS } from "../queries/query";
+import { GET_HOME } from "../queries/query";
 import AwesomeSlider from "react-awesome-slider";
 import "react-awesome-slider/dist/styles.css";
 import withAutoplay from "react-awesome-slider/dist/autoplay";
 // SEO
 import { Helmet } from "react-helmet";
+// images
+import p1 from '../assets/hero1.png';
+import p2 from '../assets/hero2.png';
+import p3 from '../assets/hero3.png';
+import p4 from '../assets/hero6.jpg';
 
 //  autoplay slider
 const AutoplaySlider = withAutoplay(AwesomeSlider);
@@ -35,7 +39,7 @@ export default function Home() {
   const { openNav } = useContext(NavContext);
 
   // home query
-  const { loading, error, data } = useQuery(GET_ITEMS);
+  const { loading, error, data } = useQuery(GET_HOME);
 
   if(loading) return (
     <LoadingWrapper>
@@ -48,45 +52,30 @@ export default function Home() {
   
   // grid items
   const gridItems = (category) => {
-    let array = [...data[category].items];
+    let array = data && [...data[category].items];
 
     return array
-      .map((e) => {
-        return <Item key={e.sys.id} item={e} ></Item>;
+      .map((item) => {
+        return <Item key={item.id} item={item} ></Item>;
       });
   };
 
-  // const loadingGif = !data && (
-  //   <LoadingWrapper>
-  //     <Loading
-  //       style={{ width: "50px", height: "50px", marginTop: "200px" }}
-  //     ></Loading>
-  //   </LoadingWrapper>
-  // );
+  
+  const sources = [p4, p1, p2, p3].map((p) => {
+    return { source: p }
+  })
 
-  const sources =
-    data &&
-    data.homeCollection.items[0].heroImagesCollection.items.map((item) => {
-      return { source: item.url };
-    });
+ 
 
   const styleObject = {
     cursor: "pointer",
   }
 
-  const query = (str, item) => {
-    return str === "deals" || str === "bestsellers"?  `${item.sys.id}?category=${item.category.name}` : `${item.sys.id}` ;
-  }
+  
 
   const getShowcase = (str) => {
-    let array = [];
-    let newStr = str === "discount"? "deals": "bestsellers";
-    for(let i in data ) {
-       data[i].items.forEach((item) => item[str] &&  array.push(item))
-    }
-    return array.slice(0,3)
-    .map((e) => {
-      return <img onClick={() => history.push(`${newStr}/${query(newStr, e)}`)} style={styleObject} key={e.sys.id} src={e.imagesCollection.items[0].url} alt={e.name}></img>;
+    return data[str][0].items.map((item) => {
+      return <img onClick={() => history.push(`${str}/${item.id}`)} style={styleObject} key={item.id}  src={item.images[0].url} alt={item.name}></img>;
     });
   }
   
@@ -110,28 +99,29 @@ export default function Home() {
         organicArrows={true}
         bullets={true}
         media={sources}
-      ></AutoplaySlider>
+      >
+      </AutoplaySlider>
       <MobileWrapper>
         <MobileHero
-          src={data?.homeCollection.items[0].heroMobileImage.url}
+          src={data.homes[0].heroMobileImage.url}
         ></MobileHero>
       </MobileWrapper>
       {/* showcase */}
       <Showcase>
         {/* Deals */}
         <ShowcaseItem>
-          <h3>Deals</h3>
+          <h3>Discounts</h3>
           <div className="showcaseGrid">
-            {data && getShowcase("discount")}
+            {data && getShowcase("discounts")}
           </div>
-          <Link to="/deals">Discover More</Link>
+          <Link to="/discounts">Discover More</Link>
         </ShowcaseItem>
 
         {/* best sellers */}
         <ShowcaseItem>
           <h3>Best Seller</h3>
           <div className="showcaseGrid">
-            {data && getShowcase("bestseller")}
+            {data && getShowcase("bestsellers")}
           </div>
           <Link to="/bestsellers">Discover More</Link>
         </ShowcaseItem>
@@ -148,7 +138,7 @@ export default function Home() {
         </ShowcaseItem>
       </Showcase>
       {/* ads */}
-      <Ads src={data?.homeCollection.items[0].adsImage.url}></Ads>
+      <Ads src={data.homes[0].adsImage.url}></Ads>
       {/* row Smart phone & watch*/}
       <Row>
         <div className="rowTitle">
@@ -295,19 +285,15 @@ const Showcase = styled.div`
   @media only screen and (max-width: 1200px) {
     justify-content: flex-start;
   }
-  @media only screen and (max-width: 900px) {
+  
+
+  @media only screen and (max-width: 500px) {
+    margin: 0 0;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     height: auto;
-    margin-bottom: 5px;
-    :hover {
-      overflow-x: hidden;
-    }
-  }
 
-  @media only screen and (max-width: 500px) {
-    margin: 0 0;
     :hover {
       overflow-x: hidden;
     }
@@ -354,7 +340,7 @@ const ShowcaseItem = styled.div`
       object-fit: cover;
 
       &:hover {
-        box-shadow: 0px 5px 10px rgba(0,0,0,0.5)
+        transform: scale(1.1)
       }
     }
 
@@ -362,7 +348,6 @@ const ShowcaseItem = styled.div`
   }
 
   @media only screen and (max-width: 900px) {
-    min-width: 280px;
     margin-bottom: 10px;
 
     ${(props) =>

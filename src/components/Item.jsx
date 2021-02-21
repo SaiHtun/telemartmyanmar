@@ -1,6 +1,5 @@
 import React from "react";
 import styled, { css } from "styled-components";
-import { stringCutter } from "../utility/functions";
 import { useHistory } from "react-router-dom";
 //  variables
 import { color, fontSize } from "../constants/variables";
@@ -12,20 +11,17 @@ import { currencyFormatter } from "../utility/functions";
 export default function Item({ item, nocaption }) {
   const history = useHistory();
 
-  // const query = () => {
-  //   return item.category === "deals" || item.category === "bestsellers"?  `${item.sys.id}?category=${item.__typename}` : `${item.sys.id}` ;
-  // }
 
   return (
     <StyledItem
-      onClick={() => history.push(`/${item.category.name}/${item.sys.id}`)}
+      onClick={() => history.push(`/${item.category.name}/${item.id}`)}
       caption={nocaption}
     >
       {item.discount ? (
-        <div className="discountItem">-{item.discount}%</div>
+        <div className="discountItem">-{item.discount.value}%</div>
       ) : null}
       <div className="imgContainer">
-        <img src={item.imagesCollection.items[0].url} alt={item.name} />
+        <img src={item.images[0].url} alt={item.name} />
       </div>
       <div className="itemInfo">
         <p className="itemTitle">{item.name}</p>
@@ -37,7 +33,7 @@ export default function Item({ item, nocaption }) {
             </small>{" "}
             <small>
               {currencyFormatter(
-                Math.floor(item.price - item.price * (item.discount / 100))
+                Math.floor(item.price - item.price * (item.discount.value / 100))
               )}{" "}
               Kyats
             </small>
@@ -58,13 +54,18 @@ const StyledItem = styled.div`
   margin: 0px 15px;
   cursor: pointer;
   overflow: hidden;
-  transition: all .3s ease-in;
+ 
 
   .imgContainer {
     width: 100%;
     overflow-y: hidden;
+    transition: all .3s ease-in;
     img {
       width: 100%
+    }
+
+    :hover {
+      transform: scale(1.1)
     }
   }
 
@@ -75,9 +76,7 @@ const StyledItem = styled.div`
 
   `}
 
-  :hover {
-    box-shadow: 0px 5px 10px rgba(0,0,0,0.5)
-  }
+  
 
   @media only screen and (max-width: 800px) {
     margin: 0px 20px;

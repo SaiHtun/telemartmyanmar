@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import { useQuery } from "@apollo/client";
-import QueryTypes from '../queries/queryTypes';
-import { useParams, Link, useLocation } from "react-router-dom";
+import { GET_SINGLE_ITEM } from '../queries/query';
+import { useParams, Link } from "react-router-dom";
 import { NavContext } from "../context/NavContext";
 //  variables
 import { color } from "../constants/variables";
@@ -26,50 +26,21 @@ function Item() {
     url: "../assets/a1.jpg",
   });
   
-
-
-
-
-  const quries = new URLSearchParams(useLocation().search);
-  const str = quries.get("category");
-  
-
-  const isQueryString = () => {
-    if(str) {
-      return queryConverter[str.toLowerCase()];
-    } else {
-      return queryConverter[category]
-    }
-  }
-
-
-
-
-  const queryConverter = {
-    "smartphones": QueryTypes.single_smartphone,
-    "watchesandaccessories": QueryTypes.single_watch,
-    "electronics": QueryTypes.single_electronic,
-    "smarttv": QueryTypes.single_tv
-  }
-
  
-
   
-  const { loading, error, data } = useQuery(isQueryString(), {
-    variables: { itemId: itemId },
+  const { loading, error, data } = useQuery(GET_SINGLE_ITEM, {
+    variables: { id: itemId },
   });
 
 
+
   useEffect(() => {
-    if (data?.item.imagesCollection.items.length) {
+    if (data?.item.images.length) {
       setImgData({
         name: data.item.name,
-        url: data.item.imagesCollection.items[0].url,
+        url: data.item.images[0].url,
       });
-
-      if(data?.item.optionsCollection?.items.length) {
-        
-      }
+     
     }
 
     return () => {
@@ -103,9 +74,9 @@ function Item() {
     } else if(i === "electronics") {
       return "Electronics";
     } else if(i === "bestsellers") {
-      return "Best Sellers"
+      return "Best Seller"
     } else {
-      return "Deals"
+      return "Discounts"
     }
   };
 
@@ -120,11 +91,11 @@ function Item() {
       return "We have been distributing the electronics devices more than 20 years, fair prices and better quality is our priority."
     }
   }
-  const ImagesSection = data.item.imagesCollection.items.length > 1 ? (
+  const ImagesSection = data.item.images.length > 1 ? (
     <ImgWrapper>
       {/* img array container */}
       <ImgArrayContainer>
-        {data.item.imagesCollection.items.map((image, i) => {
+        {data.item.images.map((image, i) => {
           return (
             <Image
               src={image.url}
@@ -151,7 +122,7 @@ function Item() {
   ) : (
     <img
       className="itemImg"
-      src={`${data.item.imagesCollection.items[0].url}`}
+      src={`${data.item.images[0].url}`}
       alt={`${data.item.name}`}
     />
   )
@@ -169,7 +140,7 @@ function Item() {
         <Left>
           Discount :
         </Left>
-        <Right >{data?.item.discount}%</Right>
+        <Right >{data?.item.discount.value}%</Right>
       </li>
       <li>
         <Left>Original Price :</Left>
@@ -180,7 +151,7 @@ function Item() {
         <Right>{currencyFormatter(
           Math.floor(
             data.item.price -
-              data.item.price * (data.item.discount / 100)
+              data.item.price * (data.item.discount.value / 100)
           )
         )}{" "}
         Kyats
@@ -201,11 +172,11 @@ function Item() {
     </li>
   )
 
-  const options = data.item.optionsCollection?.items.length && <Option>
+  const options = data.item.options && <Option>
     { 
-      data.item.optionsCollection.items.map((item) => {
+      data.item.options.map((item) => {
         return (
-          <OptionCard ram={item.ram} rom={item.rom} price={item.price} colors={item.colors}></OptionCard>
+          <OptionCard ram={item.ram} rom={item.rom} price={item.price} colors={item.color}></OptionCard>
         )
       })
     }
@@ -247,7 +218,7 @@ function Item() {
                     <Left>In Stock :</Left> <Right>{data.item.instock ? "Yes" : "No (Pre-Order Available)"}</Right>
                   </li>
                   <li className="colorsWrapper">
-                      {data.item.colors.map((color, i) => (
+                      {data.item.color.map((color, i) => (
                         <ColorCircle key={i} color={color}></ColorCircle>
                       ))}
                   </li>

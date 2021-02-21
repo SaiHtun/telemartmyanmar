@@ -28,8 +28,8 @@ function Menu() {
           </span>{" "}
         </li>
         <SearchBox show="true"></SearchBox>
-        <Link to="/deals" onClick={() => setOpenNav(false)}>
-          <li>Deals</li>
+        <Link to="/discounts" onClick={() => setOpenNav(false)}>
+          <li>Discounts</li>
         </Link>
         <Link to="/bestsellers" onClick={() => setOpenNav(false)}>
           <li>Best Sellers</li>

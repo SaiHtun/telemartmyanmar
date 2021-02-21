@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useState, useRef, useCallback } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import { useParams, useLocation } from "react-router-dom";
-import { useQuery, useLazyQuery, InMemoryCache } from "@apollo/client";
-import { offsetLimitPagination, concatPagination } from "@apollo/client/utilities"
+import { useQuery } from "@apollo/client";
 
 // queries
-import QueryTypes from "../queries/queryTypes";
+import Query from "../queries/queryTypes";
 import { NavContext } from "../context/NavContext";
 // tv
 import tv from "../assets/hero1.png";
@@ -35,66 +34,39 @@ function Items() {
   const [maxPrice, setMaxPrice] = useState(0);
   const { openNav } = useContext(NavContext);
   // params
-  const { items } = useParams();
-  const location = useLocation();
+  const { category } = useParams();
+
+  const l = useLocation();
   // pagination
-  const [ offset, setOffset ] = useState(0);
+  const { loading, error, data, fetchMore } = useQuery(Query[category]);
 
-  const { loading, error, data, fetchMore } = useQuery(QueryTypes[items], {
-    variables: {
-      offset,
-      limit: 3
-    }
-  });
-
-  
 
   useEffect(() => {
-    if(data && data.smartphonesCollection) {
-      let temp = [];
-      for (let i in data) {
-        data[i].items.forEach((item) => temp.push(item));
-      }
-      setArray(shuffle(Array.from(temp)));
-      setTempArray(shuffle(Array.from(temp)));
-      let priceArray = temp.map((item) => item.price);
+    if(data && data.itemsConnection.edges.length) {
+
+      setArray(Array.from(data.itemsConnection.edges));
+      setTempArray(Array.from(data.itemsConnection.edges));
+      let priceArray =  data.itemsConnection.edges.map((item) => item.node.price);
       let defaultPrice =  Math.max(...priceArray) ;
       let minPrice =  Math.min(...priceArray) ;
       defaultPrice && setPrice(defaultPrice);
       defaultPrice && setMaxPrice(defaultPrice);
       minPrice && setMinPrice(minPrice);
-    }else if(data && data.itemsCollection){
-      setArray(shuffle(Array.from(data.itemsCollection.items)));
-      setTempArray(shuffle(Array.from(data.itemsCollection.items)));
-      let priceArray = data.itemsCollection.items.map((item) => item.price);
-      let defaultPrice = Math.max(...priceArray);
-      let minPrice = Math.min(...priceArray);
-      defaultPrice && setPrice(defaultPrice);
-      defaultPrice && setMaxPrice(defaultPrice);
-      minPrice && setMinPrice(minPrice);
     }
-  }, [data]);
 
-  
-  
-  function shuffle(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
-  
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-  
-      // Pick a remaining element...
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-  
-      // And swap it with the current element.
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
+    return () => {
+      setArray([])
     }
-    return array;
-  }
+  }, [data, category]);
 
+  if(loading) return (
+    <LoadingWrapper>
+      <Loading
+        style={{ width: "50px", height: "50px", marginTop: "200px" }}
+      ></Loading>
+    </LoadingWrapper>
+  )
+  
 
   const allItems = () => {
 
@@ -111,7 +83,7 @@ function Items() {
     } else {
       return array.map((item) => {
         return (
-            <Item  item={item} key={item.sys.id}></Item>
+            <Item  item={{...item.node, ...{category: { name: category}}}} key={item.node.id}></Item>
         );
       });
     }
@@ -122,7 +94,7 @@ function Items() {
 
   const getUnique = (property) => {
     return new Set(
-      tempArray.map((item) => item[property].name)
+      tempArray.map((item) => item.node[property].name)
     );
   };
 
@@ -137,18 +109,18 @@ function Items() {
   });
 
   const updatePrice = (array) => {
-    let prices = array.map((item) => item.price);
+    let prices = array.map((item) => item.node.price);
     setMinPrice(Math.min(...prices));
     setMaxPrice(Math.max(...prices));
   };
 
   // handle change for "select brand filter"
   const handleChange = (e) => {
-    let temp = data && data.itemsCollection? [...data?.itemsCollection.items] : [...tempArray];
+    let temp =  [...tempArray];
     if (e.target.name === "brand") {
       setBrand(e.target.value);
       if (e.target.value !== "All") {
-        temp = temp.filter((item) => item.brand.name === e.target.value);
+        temp = temp.filter((item) => item.node.brand.name === e.target.value);
         setArray(temp);
         updatePrice(temp);
       } else {
@@ -159,22 +131,22 @@ function Items() {
       setPrice(Number(e.target.value));
       if (brand !== "All") {
         temp = temp.filter(
-          (item) => item.price <= Number(e.target.value) && item.brand === brand
+          (item) => item.node.price <= Number(e.target.value) && item.node.brand.name === brand
         );
         setArray(temp);
       } else {
-        temp = temp.filter((item) => item.price <= Number(e.target.value));
+        temp = temp.filter((item) => item.node.price <= Number(e.target.value));
         setArray(temp);
       }
     }
   };
 
   const getAds = () => {
-    if (location.pathname === "/smartphones") {
+    if (l.pathname === "/smartphones") {
       return phone;
-    } else if (location.pathname === "/watchesandaccessories") {
+    } else if (l.pathname === "/watchesandaccessories") {
       return watch;
-    } else if (location.pathname === "/electronics") {
+    } else if (l.pathname === "/electronics") {
       return electronics;
     } else {
       return tv;
@@ -199,22 +171,32 @@ function Items() {
 
   
   const more = () => {
+    if( data.itemsConnection.pageInfo.hasNextPage) {
+      fetchMore({
+        variables: {
+          cursor: data.itemsConnection.pageInfo.endCursor
+        }
+      })
+    }
 
-    setOffset(offset + 3)
-    fetchMore({
-      variables: {
-        offset,
-        limit: 3
-      }
-    })
   }
+
+  const noItemStyle = {
+    "color": "rgba(0,0,0,0.8)"
+  }
+
+  const MoreButton = data.itemsConnection.pageInfo?.hasNextPage? (
+    <Button onClick={more}>More Items</Button>
+  ) : (
+    <p style={noItemStyle}>No more items..</p>
+  )
   
   return (
     <>
       <ItemsContainer open={openNav}>
         <Helmet>
           <meta charSet="utf-8" />
-          <title>{getHeader(items)} | telemartmyanmar</title>
+          <title>{getHeader(category)} | telemartmyanmar</title>
           <meta
             name="descriptions"
             content="The biggest and most reliable mobile phones, watches, smart tv, electronics devices distribution company in Myanmar"
@@ -246,20 +228,39 @@ function Items() {
               </div>
             </form>
           </Filter>
-          <button onClick={more}>Load More</button>
           {array && array.length > 0 ? (
             <div className="itemList">{allItems()}</div>
           ) : (
             <Error>No items...</Error>
           )}
         </div>
+        <BtnWrapper>
+          { data.itemsConnection.edges.length >= 4 && MoreButton }
+        </BtnWrapper>
       </ItemsContainer>
-      <div
+      {/* <div
         style={{ width: "100%", height: "100px", backgroundColor: "white" }}
-      ></div>
+      ></div> */}
     </>
   );
 }
+
+const BtnWrapper = styled.div`
+  width: 100vw;
+  padding: 30px 0px 150px 0px;
+  display: grid;
+  justify-items: center;
+`;
+
+const Button = styled.button`
+  border: none;
+  width: 150px;
+  padding: 10px;
+  background-color: ${color.lightBlue};
+  color: white;
+  font-size: 1.2em;
+  box-shadow: 0px 5px 10px rgba(0,0,0,0.8);
+`;
 
 const Ads = styled.img`
   width: 100%;
@@ -292,6 +293,7 @@ const ItemsContainer = styled.div`
   .container {
     width: 90vw;
     margin: auto;
+    padding-top: 20px;
 
     @media only screen and (max-width: 500px) {
       width: 100vw;
@@ -326,7 +328,7 @@ const ItemsContainer = styled.div`
   }
 
   .itemList {
-    /* margin: 0px 15px; */
+    margin-top: 50px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 230px));
     justify-items: center;

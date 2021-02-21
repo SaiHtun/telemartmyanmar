@@ -31,8 +31,8 @@ export default function Navbar() {
         <SearchBox></SearchBox>
         <Menu>
           <ul>
-            <Link to="/deals">
-              <li>Deals</li>
+            <Link to="/discounts">
+              <li>Discounts</li>
             </Link>
             <Link to="/bestsellers">
               <li>Best Sellers</li>

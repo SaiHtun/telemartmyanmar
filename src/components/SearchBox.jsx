@@ -32,7 +32,7 @@ export default function SearchBox({ show }) {
 
 
   const handleClick = (item) => {
-    history.push(`/${item.category.name}/${item.sys.id}`);
+    history.push(`/${item.category.name}/${item.id}`);
     setOpenNav(false);
     setShowSearch(false);
   };
@@ -46,17 +46,10 @@ export default function SearchBox({ show }) {
   const handleChange = (value) => {
     fetchSearch();
     if(data && called) {
-      let array = [];
-
-      for(let i in data) {
-        array.push(data[i].items)
-      }
-
-      let filteredArray = array.flat().filter((item) =>  item.descriptions.toLowerCase().includes(value.toLowerCase()));
+      let filteredArray = data.items.filter((item) =>  item.description.toLowerCase().includes(value.toLowerCase()));
       setFiltered(filteredArray);
       setShowSearch(true);
     }
-
 
     // setShowSearch(true);
     // let array = data.allItems.items.filter((item) =>
@@ -71,8 +64,8 @@ export default function SearchBox({ show }) {
       return (
         <div className="item" key={i} onClick={() => handleClick(item)}>
           {show
-            ? stringCutter(item.descriptions, 25)
-            : stringCutter(item.descriptions, 50)}
+            ? stringCutter(item.description, 25)
+            : stringCutter(item.description, 50)}
         </div>
       );
     });

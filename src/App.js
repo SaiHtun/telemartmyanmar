@@ -16,9 +16,6 @@ import ScrollTop from "./components/ScrollTop";
 import Footer from "./components/Footer.jsx";
 import Services from './pages/Services';
 
-
-
-
 function App() {
   return (
       <ItemsContextProvider>
@@ -39,7 +36,7 @@ function App() {
                 <Route path="/:category/:itemId">
                   <Item></Item>
                 </Route>
-                <Route path="/:items">
+                <Route path="/:category">
                   <Items></Items>
                 </Route>
                
