@@ -299,6 +299,18 @@ const GET_FOOTER = gql`
   }
 `;
 
+// ================================= Services =================================
+
+const GET_SERVICE = gql`
+  query {
+    services {
+      title
+      intro
+      messages
+    }
+  }
+`
+
 /////////// searchbar query /////////////////////////////////
 const SEARCH_QUERY = gql`
   query getSearch {
@@ -322,5 +334,6 @@ export {
   SEARCH_QUERY,
   GET_SINGLE_ITEM,
   GET_DISCOUNT_ITEMS,
-  GET_BESTSELLER_ITEMS
+  GET_BESTSELLER_ITEMS,
+  GET_SERVICE
 };
