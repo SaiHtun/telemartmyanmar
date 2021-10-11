@@ -74,7 +74,7 @@ export default function Home() {
   
 
   const getShowcase = (str) => {
-    return data[str][0].items.map((item) => {
+    return data[str][0]?.items.map((item) => {
       return <img onClick={() => history.push(`${str}/${item.id}`)} style={styleObject} key={item.id}  src={item.images[0].url} alt={item.name}></img>;
     });
   }
