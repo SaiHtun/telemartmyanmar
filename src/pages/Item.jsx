@@ -182,7 +182,6 @@ function Item() {
     }
   </Option>
 
-
   return (
     <div style={{ backgroundColor: "white" }}>
       <Helmet>
@@ -215,7 +214,7 @@ function Item() {
                   { isDiscount }
                   { isBestseller }
                   <li>
-                    <Left>In Stock :</Left> <Right>{data.item.instock ? "Yes" : "No (Pre-Order Available)"}</Right>
+                    <Left>In Stock :</Left> <Right>{data.item.inStock?.id ? "Yes" : "No (Pre-Order Available)"}</Right>
                   </li>
                   <li className="colorsWrapper">
                       {data.item.color.map((color, i) => (

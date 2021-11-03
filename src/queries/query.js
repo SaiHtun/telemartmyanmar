@@ -18,6 +18,9 @@ const GET_HOME = gql`
       discount {
         value
       }
+      inStock {
+        id
+      }
     }
   }
 
@@ -98,6 +101,9 @@ const GET_SINGLE_ITEM = gql`
       }
       bestseller {
         isBestseller
+      }
+      inStock {
+        id
       }
     }
 }
