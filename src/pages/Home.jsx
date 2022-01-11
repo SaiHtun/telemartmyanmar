@@ -14,14 +14,11 @@ import { NavContext } from "../context/NavContext";
 // apollo graphql query
 import { useQuery } from "@apollo/client";
 import { GET_HOME } from "../queries/query";
-import AwesomeSlider from "react-awesome-slider";
-import "react-awesome-slider/dist/styles.css";
-import withAutoplay from "react-awesome-slider/dist/autoplay";
+// carousels
+import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
+import { Carousel as HeroCarousel } from 'react-responsive-carousel';
 // SEO
 import { Helmet } from "react-helmet";
-
-//  autoplay slider
-const AutoplaySlider = withAutoplay(AwesomeSlider);
 
 // Variables
 const { lightBlue } = color;
@@ -83,18 +80,20 @@ export default function Home() {
         />
         <link rel="canonical" href="http://www.telemartmyanmar.com" />
       </Helmet>
-      <AutoplaySlider
-        className="heroSlider"
-        play={true}
-        cancelOnInteraction={false}
-        interval={6000}
-        organicArrows={true}
-        bullets={true}
+      <HeroCarousel 
+        autoPlay={true}
+        showThumbs={false}
+        infiniteLoop={true}
+        dynamicHeight={false}
       >
         {[...data.homes[0].slidingImages].map((p, i) => {
-          return <div data-src={p.url} key={i} />;
+          return (
+            <Slide key={i}>
+              <img className="slideImg" src={p.url} alt={p.url}/>
+            </Slide>
+          )
         })}
-      </AutoplaySlider>
+      </HeroCarousel>
       <MobileWrapper>
         <MobileHero src={data.homes[0].heroMobileImage.url}></MobileHero>
       </MobileWrapper>
@@ -185,6 +184,37 @@ const LoadingWrapper = styled.div`
   align-items: flex-start;
 `;
 
+const Slide = styled.div`
+  height: 500px;
+  margin-top: -6px;
+  ::after {
+        content: "";
+        position: absolute;
+        z-index: 10;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100px;
+        background-image: linear-gradient(
+          to top,
+          rgba(239, 239, 239, 255),
+          rgba(239, 239, 239, 0)
+        );
+      }
+  
+
+  @media only screen and (max-width: 600px) {
+      display: none;
+  }
+
+  .control-dots {
+      position: absolute;
+      top: 300px;
+      z-index: 2;
+    }
+`;
+
 const Hero = styled.div`
   width: 100vw;
   max-width: 1450px;
@@ -200,48 +230,7 @@ const Hero = styled.div`
       max-height: 90vh;
       overflow-y: hidden;
     `}
-
-  .heroSlider {
-    height: 70vh;
-    margin-top: -6px;
-    margin-bottom: -150px;
-
-    @media only screen and (max-width: 600px) {
-      display: none;
-    }
-
-    .awssld__bullets {
-      position: absolute;
-      top: 30%;
-      z-index: 2;
-    }
-
-    .awssld__content {
-      position: relative;
-
-      ::before {
-        content: "";
-        position: absolute;
-        z-index: 10;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 200px;
-        background-image: linear-gradient(
-          to top,
-          rgba(239, 239, 239, 255),
-          rgba(239, 239, 239, 0)
-        );
-      }
-    }
-
-    .awssld__bullets button {
-      width: 10px;
-      height: 10px;
-      background-color: white;
-    }
-  }
+   
 
   a {
     color: ${lightBlue};
@@ -255,6 +244,7 @@ const Hero = styled.div`
 // ###################################### Showcase ######################################
 const Showcase = styled.div`
   margin: 0 20px;
+  margin-top: -100px;
   height: 460px;
   display: flex;
   align-items: flex-start;

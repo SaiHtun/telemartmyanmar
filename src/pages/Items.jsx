@@ -1,19 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 
 // queries
 import Query from "../queries/queryTypes";
 import { NavContext } from "../context/NavContext";
-// tv
-import tv from "../assets/hero1.png";
-// phone
-import phone from "../assets/hero2.png";
-// watch
-import watch from "../assets/hero4.png";
-// elec
-import electronics from "../assets/hero6.jpg";
+import { ItemsContext } from '../context/ItemsContext';
 // SEO
 import { Helmet } from "react-helmet";
 
@@ -33,10 +26,12 @@ function Items() {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const { openNav } = useContext(NavContext);
+  const { heroImages } = useContext(ItemsContext);
+  const images = heroImages && [...heroImages.homes[0].slidingImages];
+  const randomImg = images && images[Math.floor(Math.random() * images.length)];
   // params
   const { category } = useParams();
 
-  const l = useLocation();
   // pagination
   const { loading, error, data, fetchMore } = useQuery(Query[category]);
 
@@ -139,18 +134,6 @@ function Items() {
     }
   };
 
-  const getAds = () => {
-    if (l.pathname === "/smartphones") {
-      return phone;
-    } else if (l.pathname === "/watchesandaccessories") {
-      return watch;
-    } else if (l.pathname === "/electronics") {
-      return electronics;
-    } else {
-      return tv;
-    }
-  };
-
   const getHeader = (i) => {
     if (i === "smartphones") {
       return "Smart phones";
@@ -201,9 +184,10 @@ function Items() {
           />
           <link rel="canonical" href="http://www.telemartmyanmar.com" />
         </Helmet>
-        <Ads src={getAds()}></Ads>
+        {images && (
+          <Ads src={randomImg.url}></Ads>
+        )}
         <div className="container">
-          {/* <h3 className="title">{data  && getHeader(items)}</h3> */}
           <Filter>
             <form className="form">
               <select
@@ -236,9 +220,6 @@ function Items() {
           { data.itemsConnection.edges.length >= 4 && MoreButton }
         </BtnWrapper>
       </ItemsContainer>
-      {/* <div
-        style={{ width: "100%", height: "100px", backgroundColor: "white" }}
-      ></div> */}
     </>
   );
 }
@@ -267,7 +248,9 @@ const Button = styled.button`
 
 const Ads = styled.img`
   width: 100%;
-  object-fit: contain;
+  height: 400px;
+  object-position: center;
+  object-fit: cover;
 `;
 
 const LoadingWrapper = styled.div`
