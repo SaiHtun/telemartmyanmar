@@ -19,11 +19,6 @@ import "react-awesome-slider/dist/styles.css";
 import withAutoplay from "react-awesome-slider/dist/autoplay";
 // SEO
 import { Helmet } from "react-helmet";
-// images
-import p1 from '../assets/hero1.png';
-import p2 from '../assets/hero2.png';
-import p3 from '../assets/hero3.png';
-import p4 from '../assets/hero6.jpg';
 
 //  autoplay slider
 const AutoplaySlider = withAutoplay(AwesomeSlider);
@@ -41,44 +36,41 @@ export default function Home() {
   // home query
   const { loading, error, data } = useQuery(GET_HOME);
 
-  if(loading) return (
-    <LoadingWrapper>
-      <Loading
-        style={{ width: "50px", height: "50px", marginTop: "200px" }}
-      ></Loading>
-    </LoadingWrapper>
-  )
-  if(error) return <h1>{error.message}...</h1>
-  
-  // grid items
+  if (loading)
+    return (
+      <LoadingWrapper>
+        <Loading
+          style={{ width: "50px", height: "50px", marginTop: "200px" }}
+        ></Loading>
+      </LoadingWrapper>
+    );
+  if (error) return <h1>{error.message}...</h1>;
+
   const gridItems = (category) => {
     let array = data && [...data[category].items];
 
-    return array
-      .map((item) => {
-        return <Item key={item.id} item={item} ></Item>;
-      });
+    return array.map((item) => {
+      return <Item key={item.id} item={item}></Item>;
+    });
   };
-
-  
-  const sources = [p4, p1, p2, p3].map((p) => {
-    return { source: p }
-  })
-
- 
 
   const styleObject = {
     cursor: "pointer",
-  }
-
-  
+  };
 
   const getShowcase = (str) => {
     return data[str][0]?.items.map((item) => {
-      return <img onClick={() => history.push(`${str}/${item.id}`)} style={styleObject} key={item.id}  src={item.images[0].url} alt={item.name}></img>;
+      return (
+        <img
+          onClick={() => history.push(`${str}/${item.id}`)}
+          style={styleObject}
+          key={item.id}
+          src={item.images[0].url}
+          alt={item.name}
+        ></img>
+      );
     });
-  }
-  
+  };
 
   return (
     <Hero open={openNav}>
@@ -98,22 +90,20 @@ export default function Home() {
         interval={6000}
         organicArrows={true}
         bullets={true}
-        media={sources}
       >
+        {[...data.homes[0].slidingImages].map((p, i) => {
+          return <div data-src={p.url} key={i} />;
+        })}
       </AutoplaySlider>
       <MobileWrapper>
-        <MobileHero
-          src={data.homes[0].heroMobileImage.url}
-        ></MobileHero>
+        <MobileHero src={data.homes[0].heroMobileImage.url}></MobileHero>
       </MobileWrapper>
       {/* showcase */}
       <Showcase>
         {/* Deals */}
         <ShowcaseItem>
           <h3>Discounts</h3>
-          <div className="showcaseGrid">
-            {data && getShowcase("discounts")}
-          </div>
+          <div className="showcaseGrid">{data && getShowcase("discounts")}</div>
           <Link to="/discounts">Discover More</Link>
         </ShowcaseItem>
 
@@ -147,7 +137,9 @@ export default function Home() {
           </Link>{" "}
           <Link to="/smartphones">See all</Link>
         </div>
-        <Carousel>{data["smartphones"].items.length && gridItems("smartphones")}</Carousel>
+        <Carousel>
+          {data["smartphones"].items.length && gridItems("smartphones")}
+        </Carousel>
       </Row>
       <Row>
         <div className="rowTitle">
@@ -285,7 +277,6 @@ const Showcase = styled.div`
   @media only screen and (max-width: 1200px) {
     justify-content: flex-start;
   }
-  
 
   @media only screen and (max-width: 500px) {
     margin: 0 0;
@@ -340,11 +331,9 @@ const ShowcaseItem = styled.div`
       object-fit: cover;
 
       &:hover {
-        transform: scale(1.1)
+        transform: scale(1.1);
       }
     }
-
-   
   }
 
   @media only screen and (max-width: 900px) {
@@ -373,7 +362,6 @@ const Ads = styled.img`
     margin: 5px 0px;
   }
 `;
-
 
 // ###################################### row ######################################
 const Row = styled.div`
@@ -519,11 +507,8 @@ const MobileHero = styled.img`
   margin-bottom: -150px;
   /* position: relative; */
 
-
   @media only screen and (max-width: 600px) {
     display: block;
-
-    
   }
 `;
 
@@ -546,12 +531,7 @@ const MobileWrapper = styled.div`
         rgba(239, 239, 239, 0)
       );
     }
-
-    
   }
-
-
-  
 `;
 
 const info = {

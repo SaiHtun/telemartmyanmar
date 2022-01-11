@@ -40,7 +40,6 @@ function Items() {
   // pagination
   const { loading, error, data, fetchMore } = useQuery(Query[category]);
 
-
   useEffect(() => {
     if(data && data.itemsConnection.edges.length) {
 
@@ -67,7 +66,6 @@ function Items() {
     </LoadingWrapper>
   )
   
-
   const allItems = () => {
 
     if (loading) {
