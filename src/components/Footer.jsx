@@ -28,7 +28,7 @@ export default function Footer() {
               <FaFacebookSquare className="fb" /> <FaInstagram className="in" />
               <FaGlobeAfrica className="web" />
             </Social>
-            <p>{data &&  data.footers[0].hotlines.map((line, i) => {
+            <p>☎️ Phone: {data &&  data.footers[0].hotlines.map((line, i) => {
               return (
                 <small key={i}>{line}</small>
               )
